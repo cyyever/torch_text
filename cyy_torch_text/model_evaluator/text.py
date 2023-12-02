@@ -1,5 +1,5 @@
 import torch
-from cyy_torch_toolbox.model_evaluator.base import ModelEvaluator
+from cyy_torch_toolbox.model.evaluator import ModelEvaluator
 
 
 class TextModelEvaluator(ModelEvaluator):
