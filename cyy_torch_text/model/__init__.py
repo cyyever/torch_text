@@ -9,6 +9,7 @@ from cyy_torch_toolbox.model import global_model_factory
 from cyy_torch_toolbox.model.repositary import get_model_info
 
 from ..tokenizer import get_tokenizer
+from .huggingface_model import get_hugging_face_model_info
 
 
 def get_model(
@@ -65,6 +66,12 @@ def get_model(
 
 model_constructors = get_model_info().get(DatasetType.Text, {})
 for name, model_constructor_info in model_constructors.items():
+    if DatasetType.Text not in global_model_factory:
+        global_model_factory[DatasetType.Text] = Factory()
+    global_model_factory[DatasetType.Text].register(
+        name, functools.partial(get_model, model_constructor_info)
+    )
+for name, model_constructor_info in get_hugging_face_model_info().items():
     if DatasetType.Text not in global_model_factory:
         global_model_factory[DatasetType.Text] = Factory()
     global_model_factory[DatasetType.Text].register(

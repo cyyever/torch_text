@@ -1,6 +1,6 @@
 import transformers
 from cyy_torch_toolbox.ml_type import DatasetType
-from cyy_torch_toolbox.model_evaluator import global_model_evaluator_factory
+from cyy_torch_toolbox.model import global_model_evaluator_factory
 
 from .hugging_face import HuggingFaceModelEvaluator
 from .text import TextModelEvaluator
