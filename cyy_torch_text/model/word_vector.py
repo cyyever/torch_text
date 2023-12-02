@@ -6,7 +6,7 @@ from cyy_naive_lib.log import get_logger
 from cyy_naive_lib.source_code.tarball_source import TarballSource
 from torch import nn
 
-from ..model_util import ModelUtil
+from cyy_torch_toolbox.model.util import ModelUtil
 from ..tokenizer.spacy import SpacyTokenizer
 
 
