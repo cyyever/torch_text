@@ -21,7 +21,7 @@ def add_text_extraction(dc: DatasetCollection) -> None:
     dc.append_transform(backup_target, key=TransformType.ExtractData)
 
 
-def __apply_tokenizer_transforms(
+def apply_tokenizer_transforms(
     dc: DatasetCollection,
     model_evaluator: TextModelEvaluator,
     max_len: int | None,
@@ -102,7 +102,7 @@ def add_text_transforms(
     if input_max_len is None:
         input_max_len = dc.dataset_kwargs.get("input_max_len", None)
     get_logger().info("use input text max_len %s", input_max_len)
-    __apply_tokenizer_transforms(
+    apply_tokenizer_transforms(
         dc=dc, model_evaluator=model_evaluator, max_len=input_max_len, for_input=True
     )
 
@@ -126,7 +126,7 @@ def add_text_transforms(
             dc.append_transform(int_target_to_text, key=TransformType.Target)
         max_len = dc.dataset_kwargs.get("output_max_len", None)
         get_logger().info("use output text max len %s", max_len)
-        __apply_tokenizer_transforms(
+        apply_tokenizer_transforms(
             dc=dc, model_evaluator=model_evaluator, max_len=max_len, for_input=False
         )
     # elif model_evaluator.model_type == ModelType.Classification:
