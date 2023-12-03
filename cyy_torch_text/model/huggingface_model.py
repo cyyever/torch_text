@@ -156,8 +156,6 @@ def get_hugging_face_model_info() -> dict:
     for model_name in __huggingface_models:
         normalize_model_name = model_name.replace("/", "_")
         full_model_name = "hugging_face_sequence_classification_" + normalize_model_name
-        if "codebert" in normalize_model_name:
-            print(full_model_name)
         model_info[full_model_name.lower()] = {
             "name": model_name,
             "constructor": functools.partial(
