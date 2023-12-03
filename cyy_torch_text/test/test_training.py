@@ -13,6 +13,7 @@ def test_nlp_training() -> None:
     config.hyper_parameter_config.epoch = 1
     config.hyper_parameter_config.learning_rate = 0.01
     config.dc_config.dataset_kwargs["tokenizer"] = {"type": "spacy"}
+    config.dc_config.dataset_kwargs["max_len"] = 100
     trainer = config.create_trainer()
     # trainer.model_with_loss.compile_model()
     trainer.append_named_hook(
