@@ -19,14 +19,9 @@ def get_model(
     tokenizer_kwargs = dataset_collection.dataset_kwargs.get("tokenizer", {})
     if "hugging_face" in kwargs.get("name", ""):
         tokenizer_kwargs["type"] = "hugging_face"
-        tokenizer_kwargs["name"] = (
-            kwargs["name"]
-            .replace("hugging_face_seq2seq_lm_", "")
-            .replace("hugging_face_sequence_classification_", "")
-            .replace("hugging_face_", "")
-        )
+        tokenizer_kwargs["name"] = model_constructor_info["name"]
     tokenizer = get_tokenizer(dataset_collection, tokenizer_kwargs)
-    get_logger().info("tokenizer is %s", tokenizer)
+    get_logger().debug("tokenizer is %s", tokenizer)
 
     if tokenizer is not None and hasattr(tokenizer, "itos"):
         for k in ("num_embeddings", "token_num"):
@@ -53,14 +48,14 @@ def get_model(
     res = {"model": model}
     if tokenizer is not None:
         res |= {"tokenizer": tokenizer}
-    word_vector_name = kwargs.get("word_vector_name", None)
-    if word_vector_name is not None:
-        from .word_vector import PretrainedWordVector
+        word_vector_name = kwargs.get("word_vector_name", None)
+        if word_vector_name is not None:
+            from .word_vector import PretrainedWordVector
 
-        PretrainedWordVector(word_vector_name).load_to_model(
-            model=model,
-            tokenizer=tokenizer,
-        )
+            PretrainedWordVector(word_vector_name).load_to_model(
+                model=model,
+                tokenizer=tokenizer,
+            )
     return res
 
 

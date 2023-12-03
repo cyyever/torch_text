@@ -3,7 +3,6 @@ import functools
 import transformers
 from cyy_naive_lib.log import get_logger
 
-
 __huggingface_models = [
     "bert-base-uncased",
     "bert-large-uncased",
@@ -155,25 +154,28 @@ def __create_hugging_face_model(model_name: str, pretrained: bool, **model_kwarg
 def get_hugging_face_model_info() -> dict:
     model_info: dict = {}
     for model_name in __huggingface_models:
-        full_model_name = "hugging_face_sequence_classification_" + model_name
+        normalize_model_name = model_name.replace("/", "_")
+        full_model_name = "hugging_face_sequence_classification_" + normalize_model_name
+        if "codebert" in normalize_model_name:
+            print(full_model_name)
         model_info[full_model_name.lower()] = {
-            "name": full_model_name,
+            "name": model_name,
             "constructor": functools.partial(
                 __create_hugging_face_sequence_classification_model,
                 model_name,
             ),
         }
-        full_model_name = "hugging_face_" + model_name
+        full_model_name = "hugging_face_" + normalize_model_name
         model_info[full_model_name.lower()] = {
-            "name": full_model_name,
+            "name": model_name,
             "constructor": functools.partial(
                 __create_hugging_face_model,
                 model_name,
             ),
         }
-        full_model_name = "hugging_face_seq2seq_lm_" + model_name
+        full_model_name = "hugging_face_seq2seq_lm_" + normalize_model_name
         model_info[full_model_name.lower()] = {
-            "name": full_model_name,
+            "name": model_name,
             "constructor": functools.partial(
                 __create_hugging_face_seq2seq_lm_model,
                 model_name,
