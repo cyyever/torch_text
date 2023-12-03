@@ -18,3 +18,4 @@ def get_hungging_face_datasets() -> dict:
 def register_constructors() -> None:
     for name, constructor in get_hungging_face_datasets().items():
         register_dataset_constructors(DatasetType.Text, name, constructor)
+        register_dataset_constructors(DatasetType.CodeText, name, constructor)
