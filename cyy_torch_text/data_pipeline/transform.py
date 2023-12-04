@@ -78,7 +78,7 @@ def get_label_to_text_mapping(dataset_name: str) -> dict | None:
 def add_text_transforms(
     dc: DatasetCollection, model_evaluator: TextModelEvaluator
 ) -> None:
-    assert dc.dataset_type == DatasetType.Text
+    assert dc.dataset_type in (DatasetType.Text, DatasetType.CodeText)
     dataset_name: str = dc.name.lower()
     # InputText
     if dataset_name == "imdb":
