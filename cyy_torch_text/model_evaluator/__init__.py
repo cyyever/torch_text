@@ -13,3 +13,4 @@ def get_model_evaluator(model, **kwargs):
 
 
 global_model_evaluator_factory.register(DatasetType.Text, get_model_evaluator)
+global_model_evaluator_factory.register(DatasetType.CodeText, get_model_evaluator)
