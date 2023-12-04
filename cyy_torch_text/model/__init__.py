@@ -2,7 +2,7 @@ import copy
 import functools
 
 from cyy_naive_lib.log import get_logger
-from cyy_torch_toolbox.dataset_collection import DatasetCollection
+from cyy_torch_toolbox.dataset.collection import DatasetCollection
 from cyy_torch_toolbox.factory import Factory
 from cyy_torch_toolbox.ml_type import DatasetType
 from cyy_torch_toolbox.model import global_model_factory

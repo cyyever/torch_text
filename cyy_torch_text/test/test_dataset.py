@@ -1,5 +1,5 @@
 import cyy_torch_text  # noqa: F401
-from cyy_torch_toolbox.dataset_collection import create_dataset_collection
+from cyy_torch_toolbox.dataset import create_dataset_collection
 
 
 def test_dataset() -> None:

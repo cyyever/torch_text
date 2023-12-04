@@ -1,8 +1,7 @@
 import functools
 
 import huggingface_hub
-from cyy_torch_toolbox.dataset_collection.dataset_repository import \
-    register_dataset_constructors
+from cyy_torch_toolbox.dataset.repository import register_dataset_constructors
 from cyy_torch_toolbox.ml_type import DatasetType
 from datasets import load_dataset as load_hugging_face_dataset
 
