@@ -1,6 +1,6 @@
 import torch
 import torch.utils
-from cyy_torch_toolbox.dataset.util import DatasetUtil
+from cyy_torch_toolbox import DatasetUtil
 
 
 class TextDatasetUtil(DatasetUtil):

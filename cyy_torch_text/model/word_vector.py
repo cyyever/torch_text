@@ -4,9 +4,9 @@ import pickle
 import torch
 from cyy_naive_lib.log import get_logger
 from cyy_naive_lib.source_code.tarball_source import TarballSource
+from cyy_torch_toolbox import ModelUtil
 from torch import nn
 
-from cyy_torch_toolbox.model.util import ModelUtil
 from ..tokenizer.spacy import SpacyTokenizer
 
 

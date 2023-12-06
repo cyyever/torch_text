@@ -1,7 +1,7 @@
 from typing import Any
 
 import torch
-from cyy_torch_toolbox.ml_type import ModelType
+from cyy_torch_toolbox import ModelType
 from cyy_torch_toolbox.tensor import tensor_to
 
 from .text import TextModelEvaluator
