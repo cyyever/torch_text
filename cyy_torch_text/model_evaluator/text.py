@@ -10,6 +10,9 @@ class TextModelEvaluator(ModelEvaluator):
     def get_feature_forward_fun(self) -> str:
         return "forward_input_feature"
 
+    def get_underlying_model_type(self):
+        return self.model_type
+
     def split_batch_input(self, inputs, targets) -> dict:
         batch_dim: int = 0
         if isinstance(inputs, torch.Tensor):
