@@ -1,14 +1,28 @@
 import copy
 import functools
 
+import transformers
 from cyy_naive_lib.log import get_logger
 from cyy_torch_toolbox import DatasetCollection, DatasetType
 from cyy_torch_toolbox.factory import Factory
-from cyy_torch_toolbox.model import global_model_factory
+from cyy_torch_toolbox.model import (global_model_evaluator_factory,
+                                     global_model_factory)
 from cyy_torch_toolbox.model.repositary import get_model_info
 
 from ..tokenizer import get_tokenizer
+from .hugging_face_evaluator import HuggingFaceModelEvaluator
 from .huggingface_model import get_hugging_face_model_info
+from .text_evaluator import TextModelEvaluator
+
+
+def get_model_evaluator(model, **kwargs):
+    if isinstance(model, transformers.PreTrainedModel):
+        return HuggingFaceModelEvaluator(model=model, **kwargs)
+    return TextModelEvaluator(model=model, **kwargs)
+
+
+global_model_evaluator_factory.register(DatasetType.Text, get_model_evaluator)
+global_model_evaluator_factory.register(DatasetType.CodeText, get_model_evaluator)
 
 
 def get_model(

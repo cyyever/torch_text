@@ -3,14 +3,13 @@ import functools
 import torch
 import transformers as hugging_face_transformers
 from cyy_naive_lib.log import get_logger
+from cyy_torch_toolbox import (DatasetCollection, DatasetType,
+                               MachineLearningPhase, ModelType, TransformType)
 from cyy_torch_toolbox.data_pipeline.common import (backup_target,
                                                     int_target_to_text,
                                                     replace_str)
-from cyy_torch_toolbox.dataset.collection import DatasetCollection
-from cyy_torch_toolbox.ml_type import (DatasetType, MachineLearningPhase,
-                                       ModelType, TransformType)
 
-from ..model_evaluator.text import TextModelEvaluator
+from ..model.text_evaluator import TextModelEvaluator
 from ..tokenizer.spacy import SpacyTokenizer
 from .template import get_text_template, interpret_template
 

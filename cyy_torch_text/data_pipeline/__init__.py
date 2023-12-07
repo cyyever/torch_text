@@ -1,5 +1,5 @@
+from cyy_torch_toolbox import DatasetType
 from cyy_torch_toolbox.data_pipeline import global_data_transform_factory
-from cyy_torch_toolbox.ml_type import DatasetType
 
 from .transform import add_text_extraction, add_text_transforms
 

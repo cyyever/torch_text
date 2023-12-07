@@ -4,7 +4,7 @@ import torch
 from cyy_torch_toolbox import ModelType
 from cyy_torch_toolbox.tensor import tensor_to
 
-from .text import TextModelEvaluator
+from .text_evaluator import TextModelEvaluator
 
 
 class HuggingFaceModelEvaluator(TextModelEvaluator):

@@ -15,7 +15,6 @@ setuptools.setup(
         "cyy_torch_text",
         "cyy_torch_text/dataset",
         "cyy_torch_text/data_pipeline",
-        "cyy_torch_text/model_evaluator",
         "cyy_torch_text/model",
         "cyy_torch_text/tokenizer",
     ],

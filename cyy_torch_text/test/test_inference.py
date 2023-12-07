@@ -1,6 +1,4 @@
-import cyy_torch_text
-from cyy_torch_toolbox.default_config import Config
-from cyy_torch_toolbox.ml_type import MachineLearningPhase
+from cyy_torch_toolbox import Config, MachineLearningPhase
 
 
 def test_gradient() -> None:

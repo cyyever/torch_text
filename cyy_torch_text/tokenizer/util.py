@@ -1,7 +1,7 @@
 from collections import Counter
 from typing import Callable
 
-from cyy_torch_toolbox.ml_type import MachineLearningPhase
+from cyy_torch_toolbox import MachineLearningPhase
 
 from ..dataset.util import TextDatasetUtil
 
