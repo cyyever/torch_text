@@ -3,7 +3,7 @@ from typing import Callable
 
 from cyy_torch_toolbox import MachineLearningPhase
 
-from ..dataset.util import TextDatasetUtil
+from ..dataset import TextDatasetUtil
 
 
 def collect_tokens(
