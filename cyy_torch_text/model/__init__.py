@@ -1,11 +1,11 @@
-import copy
 import functools
 
 import transformers
 from cyy_naive_lib.log import get_logger
 from cyy_torch_toolbox import DatasetCollection, DatasetType
 from cyy_torch_toolbox.factory import Factory
-from cyy_torch_toolbox.model import (global_model_evaluator_factory,
+from cyy_torch_toolbox.model import (create_model,
+                                     global_model_evaluator_factory,
                                      global_model_factory)
 from cyy_torch_toolbox.model.repositary import get_model_info
 
@@ -28,7 +28,7 @@ global_model_evaluator_factory.register(DatasetType.CodeText, get_model_evaluato
 def get_model(
     model_constructor_info: dict, dataset_collection: DatasetCollection, **kwargs
 ) -> dict:
-    final_model_kwargs: dict = {}
+    final_model_kwargs: dict = kwargs
     tokenizer_kwargs = dataset_collection.dataset_kwargs.get("tokenizer", {})
     if "hugging_face" in kwargs.get("name", ""):
         tokenizer_kwargs["type"] = "hugging_face"
@@ -40,23 +40,7 @@ def get_model(
         for k in ("num_embeddings", "token_num"):
             if k not in kwargs:
                 final_model_kwargs[k] = len(tokenizer.itos)
-
-    final_model_kwargs |= kwargs
-
-    while True:
-        try:
-            model = model_constructor_info["constructor"](**final_model_kwargs)
-            break
-        except TypeError as e:
-            retry = False
-            for k in copy.copy(final_model_kwargs):
-                if k in str(e):
-                    get_logger().debug("%s so remove %s", e, k)
-                    final_model_kwargs.pop(k)
-                    retry = True
-                    break
-            if not retry:
-                raise e
+    model = create_model(model_constructor_info["constructor"], **final_model_kwargs)
 
     res = {"model": model}
     if tokenizer is not None:
