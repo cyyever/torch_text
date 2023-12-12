@@ -28,14 +28,12 @@ def apply_tokenizer_transforms(
 ) -> None:
     if for_input:
         batch_key = TransformType.InputBatch
+        key = TransformType.Input
     else:
         batch_key = TransformType.TargetBatch
+        key = TransformType.Target
     match model_evaluator.tokenizer:
         case SpacyTokenizer():
-            if for_input:
-                key = TransformType.Input
-            else:
-                key = TransformType.Target
             dc.append_transform(model_evaluator.tokenizer, key=key)
             if max_len is not None:
                 dc.append_transform(
@@ -59,7 +57,7 @@ def apply_tokenizer_transforms(
                     return_tensors="pt",
                     truncation=True,
                 ),
-                key=batch_key,
+                key=key,
             )
         case _:
             raise NotImplementedError(type(model_evaluator.tokenizer))
