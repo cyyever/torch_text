@@ -66,14 +66,16 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
         targets = kwargs["targets"]
         model_input = self._create_input(**kwargs)
         output = self.model(**model_input)
-        return {
-            "model_input": model_input,
-            "model_output": output,
-            "logits": output.logits,
-            "loss": output.loss,
-            "is_averaged_loss": True,
-            "loss_batch_size": targets.shape[0],
-        }
+        if kwargs.get("reduce_loss", True):
+            return {
+                "model_input": model_input,
+                "model_output": output,
+                "logits": output.logits,
+                "loss": output.loss,
+                "is_averaged_loss": True,
+                "loss_batch_size": targets.shape[0],
+            }
+        return self._compute_loss(output=output.logits, **kwargs)
 
     def _choose_loss_function(self) -> Callable:
         match self.model.config.problem_type:
