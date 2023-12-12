@@ -109,7 +109,7 @@ __huggingface_models = [
 ]
 
 
-def __create_hugging_face_seq2seq_lm_model(
+def __create_huggingface_seq2seq_lm_model(
     model_name: str, pretrained: bool, **model_kwargs
 ):
     if pretrained:
@@ -123,7 +123,7 @@ def __create_hugging_face_seq2seq_lm_model(
     return model
 
 
-def __create_hugging_face_sequence_classification_model(
+def __create_huggingface_sequence_classification_model(
     model_name: str, pretrained: bool, **model_kwargs
 ):
     if pretrained:
@@ -139,7 +139,7 @@ def __create_hugging_face_sequence_classification_model(
     return model
 
 
-def __create_hugging_face_model(model_name: str, pretrained: bool, **model_kwargs):
+def __create_huggingface_model(model_name: str, pretrained: bool, **model_kwargs):
     if pretrained:
         pretrained_model = transformers.AutoModel.from_pretrained(
             model_name, **model_kwargs
@@ -151,7 +151,7 @@ def __create_hugging_face_model(model_name: str, pretrained: bool, **model_kwarg
     return model
 
 
-def get_hugging_face_model_info() -> dict:
+def get_huggingface_model_info() -> dict:
     model_info: dict = {}
     for model_name in __huggingface_models:
         normalize_model_name = model_name.replace("/", "_")
@@ -159,7 +159,7 @@ def get_hugging_face_model_info() -> dict:
         model_info[full_model_name.lower()] = {
             "name": model_name,
             "constructor": functools.partial(
-                __create_hugging_face_sequence_classification_model,
+                __create_huggingface_sequence_classification_model,
                 model_name,
             ),
         }
@@ -167,7 +167,7 @@ def get_hugging_face_model_info() -> dict:
         model_info[full_model_name.lower()] = {
             "name": model_name,
             "constructor": functools.partial(
-                __create_hugging_face_model,
+                __create_huggingface_model,
                 model_name,
             ),
         }
@@ -175,7 +175,7 @@ def get_hugging_face_model_info() -> dict:
         model_info[full_model_name.lower()] = {
             "name": model_name,
             "constructor": functools.partial(
-                __create_hugging_face_seq2seq_lm_model,
+                __create_huggingface_seq2seq_lm_model,
                 model_name,
             ),
         }

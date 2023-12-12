@@ -10,8 +10,8 @@ from cyy_torch_toolbox.model import (create_model,
 from cyy_torch_toolbox.model.repositary import get_model_info
 
 from ..tokenizer import get_tokenizer
-from .hugging_face_evaluator import HuggingFaceModelEvaluator
-from .huggingface_model import get_hugging_face_model_info
+from .huggingface_evaluator import HuggingFaceModelEvaluator
+from .huggingface_model import get_huggingface_model_info
 from .text_evaluator import TextModelEvaluator
 
 
@@ -57,7 +57,7 @@ def get_model(
 
 
 model_constructors = (
-    get_model_info().get(DatasetType.Text, {}) | get_hugging_face_model_info()
+    get_model_info().get(DatasetType.Text, {}) | get_huggingface_model_info()
 )
 for name, model_constructor_info in model_constructors.items():
     for dataset_type in (DatasetType.Text, DatasetType.CodeText):
