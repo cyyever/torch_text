@@ -3,6 +3,7 @@ from typing import Any
 import torch
 from cyy_torch_toolbox import ModelType
 from cyy_torch_toolbox.tensor import tensor_to
+from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 
 from .text_evaluator import TextModelEvaluator
 
@@ -51,7 +52,7 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
         targets: dict,
         device: torch.device,
         non_blocking: bool,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> dict:
         if hasattr(targets, "input_ids"):
             targets = targets.input_ids
@@ -73,3 +74,15 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
             "is_averaged_loss": True,
             "loss_batch_size": targets.shape[0],
         }
+
+    def _loss(self):
+        match self.model.config.problem_type:
+            case "regression":
+                loss_fun = MSELoss
+            case "single_label_classification":
+                loss_fun = CrossEntropyLoss
+            case "multi_label_classification":
+                loss_fun = BCEWithLogitsLoss
+            case _:
+                raise NotImplementedError(self.model.config.problem_type)
+        return loss_fun
