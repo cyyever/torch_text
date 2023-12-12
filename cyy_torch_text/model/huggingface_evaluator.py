@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable
 
 import torch
 from cyy_torch_toolbox import ModelType
@@ -75,7 +75,7 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
             "loss_batch_size": targets.shape[0],
         }
 
-    def _loss(self):
+    def _choose_loss_function(self) -> Callable:
         match self.model.config.problem_type:
             case "regression":
                 loss_fun = MSELoss
@@ -85,4 +85,4 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
                 loss_fun = BCEWithLogitsLoss
             case _:
                 raise NotImplementedError(self.model.config.problem_type)
-        return loss_fun
+        return loss_fun()
