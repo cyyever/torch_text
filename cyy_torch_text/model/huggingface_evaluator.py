@@ -2,7 +2,6 @@ from typing import Any, Callable
 
 import torch
 from cyy_torch_toolbox import ModelType
-from cyy_torch_toolbox.tensor import tensor_to
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 
 from .text_evaluator import TextModelEvaluator
@@ -57,7 +56,7 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
         if hasattr(targets, "input_ids"):
             targets = targets.input_ids
         inputs["labels"] = targets
-        return tensor_to(inputs, device=device, non_blocking=non_blocking)
+        return inputs
 
     def get_feature_forward_fun(self) -> str:
         return "_forward_model"
