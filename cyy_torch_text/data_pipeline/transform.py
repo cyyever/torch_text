@@ -20,6 +20,13 @@ def add_text_extraction(dc: DatasetCollection) -> None:
     dc.append_transform(backup_target, key=TransformType.ExtractData)
 
 
+def squeeze_huggingface_input(huggingface_input) -> None:
+    for k in ("input_ids", "attention_mask"):
+        if k in huggingface_input:
+            huggingface_input[k] = huggingface_input[k].squeeze(dim=0)
+    return huggingface_input
+
+
 def apply_tokenizer_transforms(
     dc: DatasetCollection,
     model_evaluator: TextModelEvaluator,
@@ -57,8 +64,9 @@ def apply_tokenizer_transforms(
                     return_tensors="pt",
                     truncation=True,
                 ),
-                key=batch_key,
+                key=key,
             )
+            dc.append_transform(squeeze_huggingface_input, key=key)
         case _:
             raise NotImplementedError(type(model_evaluator.tokenizer))
 
