@@ -57,7 +57,7 @@ def apply_tokenizer_transforms(
                     return_tensors="pt",
                     truncation=True,
                 ),
-                key=key,
+                key=batch_key,
             )
         case _:
             raise NotImplementedError(type(model_evaluator.tokenizer))
