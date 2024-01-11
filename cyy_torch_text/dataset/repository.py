@@ -1,20 +1,19 @@
 import functools
+from typing import Any
 
-import huggingface_hub
-from cyy_torch_toolbox import DatasetType
-from cyy_torch_toolbox.dataset.repository import register_dataset_constructors
+from cyy_torch_toolbox import Factory
 from datasets import load_dataset as load_hugging_face_dataset
+from datasets import load_dataset_builder
 
 
-@functools.cache
-def get_hungging_face_datasets() -> dict:
-    return {
-        dataset.id: functools.partial(load_hugging_face_dataset, path=dataset.id)
-        for dataset in huggingface_hub.list_datasets(full=False)
-    }
+class HunggingFaceFactory(Factory):
+    def get(self, key: str, case_sensitive: bool = True) -> Any:
+        assert case_sensitive
+        try:
+            load_dataset_builder(path=key)
+        except BaseException:
+            return None
+        return functools.partial(load_hugging_face_dataset, path=key)
 
-
-def register_constructors() -> None:
-    for name, constructor in get_hungging_face_datasets().items():
-        register_dataset_constructors(DatasetType.Text, name, constructor)
-        register_dataset_constructors(DatasetType.CodeText, name, constructor)
+    def get_similar_keys(self, key: str) -> list[str]:
+        return []
