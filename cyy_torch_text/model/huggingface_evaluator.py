@@ -50,7 +50,6 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
         inputs: dict,
         targets: dict,
         device: torch.device,
-        non_blocking: bool,
         **kwargs: Any,
     ) -> dict:
         if hasattr(targets, "input_ids"):
