@@ -1,8 +1,6 @@
 from typing import Any
 
-
-from ..ml_type import DatasetType
-from .dataset_collection import DatasetCollection
+from cyy_torch_toolbox import DatasetCollection, DatasetType
 
 
 class TextDatasetCollection(DatasetCollection):

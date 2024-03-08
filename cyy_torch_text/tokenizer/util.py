@@ -1,34 +1,42 @@
-from collections import Counter
 from typing import Callable
 
-from cyy_torch_toolbox import MachineLearningPhase
+import torch
+import transformers
 
-from ..dataset import TextDatasetUtil
+from .spacy import SpacyTokenizer
 
 
-def collect_tokens(
-    dc,
+def get_mask_token(tokenizer: Callable) -> str:
+    match tokenizer:
+        case SpacyTokenizer():
+            return "<mask>"
+        case transformers.PreTrainedTokenizerBase():
+            return tokenizer.mask_token
+        case _:
+            raise NotImplementedError(type(tokenizer))
+
+
+def extract_token_indices(
+    sample_input: transformers.BatchEncoding | torch.Tensor,
     tokenizer: Callable,
-    phase: MachineLearningPhase | None = None,
-) -> Counter:
-    counter: Counter = Counter()
-
-    if phase is None:
-        util_list = [dc.get_dataset_util(phase=phase) for phase in MachineLearningPhase]
-    else:
-        util_list = [dc.get_dataset_util(phase=phase)]
-    for util in util_list:
-        assert isinstance(util, TextDatasetUtil)
-        for index in range(len(util)):
-            input_text = util.get_sample_text(index)
-            match input_text:
-                case str():
-                    input_text = [input_text]
-                # case [*elements]:
-                #     pass
-                case _:
-                    raise NotImplementedError(type(input_text))
-            for text in input_text:
-                tokens = tokenizer(text)
-                counter.update(str(token) for token in tokens)
-    return counter
+    strip_special_token: bool = True,
+) -> tuple:
+    match tokenizer:
+        case transformers.PreTrainedTokenizerBase():
+            assert isinstance(sample_input, transformers.BatchEncoding)
+            input_ids = sample_input["input_ids"].squeeze()
+            input_ids = input_ids[input_ids != tokenizer.pad_token_id]
+            res = []
+            input_ids = input_ids.view(-1).tolist()
+            if strip_special_token:
+                if input_ids[0] == tokenizer.cls_token_id:
+                    input_ids = input_ids[1:]
+                if input_ids[-1] == tokenizer.sep_token_id:
+                    input_ids = input_ids[:-1]
+            res.append(tuple(input_ids))
+            return tuple(res)
+        case SpacyTokenizer():
+            assert isinstance(sample_input, torch.Tensor)
+            return tuple((word_idx,) for word_idx in sample_input.tolist())
+        case _:
+            raise NotImplementedError(type(tokenizer))
