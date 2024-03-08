@@ -9,26 +9,17 @@ from .spacy import SpacyTokenizer
 
 TokenizerType: TypeAlias = SpacyTokenizer | transformers.PreTrainedTokenizerBase
 TokenContainerType: TypeAlias = transformers.BatchEncoding | torch.Tensor
+TokenIDType: TypeAlias = tuple[int] | tuple[tuple[int]]
 
 
-def get_mask_token(tokenizer: TokenizerType) -> str:
-    match tokenizer:
-        case SpacyTokenizer():
-            return "<mask>"
-        case transformers.PreTrainedTokenizerBase():
-            return tokenizer.mask_token
-        case _:
-            raise NotImplementedError(type(tokenizer))
-
-
-def extract_token_indices(
+def __extract_token_ids(
     token_container: TokenContainerType,
-    tokenizer: TokenizerType | None = None,
-    strip_special_token: bool = True,
-) -> tuple:
+    tokenizer: TokenizerType,
+    strip_special_token: bool,
+) -> TokenIDType:
     match token_container:
         case transformers.BatchEncoding():
-            assert isinstance(token_container, transformers.BatchEncoding)
+            assert isinstance(tokenizer, transformers.PreTrainedTokenizerBase)
             input_ids: torch.Tensor = token_container["input_ids"].squeeze()
             if tokenizer is not None:
                 input_ids = input_ids[input_ids != tokenizer.pad_token_id]
@@ -44,7 +35,19 @@ def extract_token_indices(
             raise NotImplementedError(type(tokenizer))
 
 
-def convert_to_token_indices(
+def convert_token_ids_to_phrase(
+    token_ids: TokenIDType, tokenizer: TokenizerType
+) -> str:
+    match tokenizer:
+        case SpacyTokenizer():
+            return " ".join(tokenizer.itos[token_id] for token_id in token_ids)
+        case transformers.PreTrainedTokenizerBase():
+            return tokenizer.decode(token_ids)
+        case _:
+            raise NotImplementedError()
+
+
+def convert_phase_to_token_ids(
     executor: Executor,
     phrase: str,
     tokenizer: TokenizerType | None = None,
@@ -56,22 +59,15 @@ def convert_to_token_indices(
     token_container = transforms.transform_input(
         transforms.transform_text(phrase), apply_random=False
     )
-    token_indices = extract_token_indices(
+    token_ids = __extract_token_ids(
         token_container, tokenizer=tokenizer, strip_special_token=strip_special_token
     )
-    match tokenizer:
-        case SpacyTokenizer():
-            assert "".join(
-                tokenizer.itos[idx] for idx in token_indices
-            ) == phrase.replace(" ", "")
-        case transformers.PreTrainedTokenizerBase():
-            decoded_phrase = tokenizer.decode(token_indices)
-            fdsds
-            if decoded_phrase.replace(" ", "") != phrase.replace(" ", ""):
-                get_logger().error("failed to recover phrase")
-                get_logger().error("phrase is: %s", phrase)
-                get_logger().error("decoded phrase is: %s", decoded_phrase)
-                raise RuntimeError("failed to recover phrase")
-        case _:
-            raise NotImplementedError()
-    return token_indices
+    decoded_phrase = convert_token_ids_to_phrase(
+        token_ids=token_ids, tokenizer=tokenizer
+    )
+    if decoded_phrase.replace(" ", "") != phrase.replace(" ", ""):
+        get_logger().error("failed to recover phrase")
+        get_logger().error("phrase is: %s", phrase)
+        get_logger().error("decoded phrase is: %s", decoded_phrase)
+        raise RuntimeError("failed to recover phrase")
+    return token_ids

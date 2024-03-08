@@ -1,7 +1,6 @@
 import functools
 
 import torch
-import transformers as hugging_face_transformers
 from cyy_naive_lib.log import get_logger
 from cyy_torch_toolbox import (DatasetCollection, DatasetType,
                                MachineLearningPhase, ModelType, TransformType)
@@ -10,6 +9,7 @@ from cyy_torch_toolbox.data_pipeline.common import (backup_target,
                                                     replace_str)
 
 from ..model.text_evaluator import TextModelEvaluator
+from ..tokenizer.hugging_face import HuggingFaceTokenizer
 from ..tokenizer.spacy import SpacyTokenizer
 from .template import get_text_template, interpret_template
 
@@ -51,14 +51,14 @@ def apply_tokenizer_transforms(
             dc.append_transform(
                 functools.partial(
                     torch.nn.utils.rnn.pad_sequence,
-                    padding_value=model_evaluator.tokenizer.get_index("<pad>"),
+                    padding_value=model_evaluator.tokenizer.get_token_id("<pad>"),
                 ),
                 key=batch_key,
             )
-        case hugging_face_transformers.PreTrainedTokenizerBase():
+        case HuggingFaceTokenizer():
             dc.append_transform(
                 functools.partial(
-                    model_evaluator.tokenizer,
+                    model_evaluator.tokenizer.tokenizer,
                     max_length=max_len,
                     padding="max_length",
                     return_tensors="pt",

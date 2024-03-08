@@ -6,9 +6,10 @@ from cyy_naive_lib.log import get_logger
 from cyy_torch_toolbox import MachineLearningPhase
 
 import spacy
-from spacy.symbols import ORTH
+import spacy.symbols
 
 from ..dataset import TextDatasetUtil
+from .base import Tokenizer
 
 
 def collect_tokens(
@@ -25,7 +26,7 @@ def collect_tokens(
     for util in util_list:
         assert isinstance(util, TextDatasetUtil)
         for index in range(len(util)):
-            input_text = util.get_sample_text(index)
+            input_text: str | list[str] = util.get_sample_text(index)
             match input_text:
                 case str():
                     input_text = [input_text]
@@ -97,7 +98,7 @@ def vocab(
     return itos, stoi, ordered_dict
 
 
-class SpacyTokenizer:
+class SpacyTokenizer(Tokenizer):
     def __init__(
         self,
         dc,
@@ -110,7 +111,7 @@ class SpacyTokenizer:
     ) -> None:
         self.__keep_punct = keep_punct
         self.__keep_stop = keep_stop
-        self.__spacy = spacy.load(package_name)
+        self.__spacy: spacy.language.Language = spacy.load(package_name)
         self.unusual_words: set = set()
 
         counter: Counter = dc.get_cached_data(
@@ -127,7 +128,9 @@ class SpacyTokenizer:
         for token in ("<pad>", "<unk>", "<mask>", "<cls>", "<sep>"):
             special_tokens.add(token)
         for token in special_tokens:
-            self.__spacy.tokenizer.add_special_case(token, [{ORTH: token}])
+            self.__spacy.tokenizer.add_special_case(
+                token, [{spacy.symbols.ORTH: token}]
+            )
 
         # First sort by descending frequency, then lexicographically
         sorted_by_freq_tuples = sorted(counter.items(), key=lambda x: (-x[1], x[0]))
@@ -162,11 +165,15 @@ class SpacyTokenizer:
     def freq_dict(self) -> OrderedDict:
         return self.__freq_dict
 
-    def spacy_model(self):
+    @property
+    def spacy_model(self) -> spacy.language.Language:
         return self.__spacy
 
-    def __tokenize(self, s) -> list[str]:
-        tokens = self.__spacy.tokenizer(s)
+    def get_mask_token(self) -> str:
+        return "<mask>"
+
+    def tokenize(self, phrase: str) -> list[str]:
+        tokens = self.__spacy.tokenizer(phrase)
         return [
             t.text
             for t in tokens
@@ -174,8 +181,8 @@ class SpacyTokenizer:
             and (self.__keep_stop or not t.is_stop)
         ]
 
-    def get_index(self, token: str) -> int:
+    def get_token_id(self, token: str) -> int:
         return self.__stoi.get(token, self.__default_index)
 
-    def __call__(self, s) -> list[int]:
-        return [self.get_index(token) for token in self.__tokenize(s)]
+    def __call__(self, phrase: str) -> list[int]:
+        return [self.get_token_id(token) for token in self.tokenize(phrase)]
