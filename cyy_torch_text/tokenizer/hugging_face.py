@@ -1,4 +1,5 @@
-import torch
+from functools import cached_property
+
 import transformers
 
 from .base import TokenIDType, Tokenizer
@@ -12,6 +13,14 @@ class HuggingFaceTokenizer(Tokenizer):
             )
         )
 
+    @cached_property
+    def special_tokens(self) -> set[str]:
+        tokens = set()
+        for attr in self.__tokenizer.SPECIAL_TOKENS_ATTRIBUTES:
+            if attr != "additional_special_tokens" and hasattr(self.__tokenizer, attr):
+                tokens.add(getattr(self.__tokenizer, attr))
+        return tokens
+
     @property
     def tokenizer(self) -> transformers.PreTrainedTokenizerBase:
         return self.__tokenizer
@@ -21,15 +30,12 @@ class HuggingFaceTokenizer(Tokenizer):
 
     def tokenize(self, phrase: str) -> list[str]:
         encoding = self.__tokenizer(phrase, return_tensors="pt", truncation=False)
-        return encoding.tokens()
+        return [
+            token for token in encoding.tokens() if token not in self.special_tokens
+        ]
 
     def get_token_id(self, token: str) -> TokenIDType:
-        return self.__tokenizer.convert_tokens_to_ids(self.token)
-        # return self.__tokenizer.convert_tokens_to_
-        # encoding = self.__tokenizer(phrase, return_tensors="pt", truncation=False)
-        # input_ids: torch.Tensor = encoding["input_ids"].squeeze()
-        # input_ids = input_ids[input_ids != self.__tokenizer.pad_token_id]
-        # if input_ids[0] == tokenizer.cls_token_id:
-        #     input_ids = input_ids[1:]
-        # if input_ids[-1] == tokenizer.sep_token_id:
-        #     input_ids = input_ids[:-1]
+        return self.__tokenizer.convert_tokens_to_ids(token)
+
+    def get_token(self, token_id: TokenIDType) -> str:
+        return self.__tokenizer.decode(token_id)
