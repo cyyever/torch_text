@@ -9,7 +9,7 @@ import spacy
 import spacy.symbols
 
 from ..dataset import TextDatasetUtil
-from .base import Tokenizer
+from .base import TokenIDType, Tokenizer
 
 
 def collect_tokens(
@@ -183,6 +183,9 @@ class SpacyTokenizer(Tokenizer):
 
     def get_token_id(self, token: str) -> int:
         return self.__stoi.get(token, self.__default_index)
+
+    def get_token(self, token_id: TokenIDType) -> str:
+        return self.itos[token_id]
 
     def __call__(self, phrase: str) -> list[int]:
         return [self.get_token_id(token) for token in self.tokenize(phrase)]

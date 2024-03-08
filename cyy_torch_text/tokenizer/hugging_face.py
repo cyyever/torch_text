@@ -1,3 +1,4 @@
+import torch
 import transformers
 
 from .base import TokenIDType, Tokenizer
@@ -23,4 +24,12 @@ class HuggingFaceTokenizer(Tokenizer):
         return encoding.tokens()
 
     def get_token_id(self, token: str) -> TokenIDType:
-        raise NotImplementedError()
+        return self.__tokenizer.convert_tokens_to_ids(self.token)
+        # return self.__tokenizer.convert_tokens_to_
+        # encoding = self.__tokenizer(phrase, return_tensors="pt", truncation=False)
+        # input_ids: torch.Tensor = encoding["input_ids"].squeeze()
+        # input_ids = input_ids[input_ids != self.__tokenizer.pad_token_id]
+        # if input_ids[0] == tokenizer.cls_token_id:
+        #     input_ids = input_ids[1:]
+        # if input_ids[-1] == tokenizer.sep_token_id:
+        #     input_ids = input_ids[:-1]
