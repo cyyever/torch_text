@@ -1,15 +1,17 @@
-from typing import Callable
+from typing import TypeAlias
 
 import torch
 import transformers
 from cyy_naive_lib.log import get_logger
 from cyy_torch_toolbox import Executor
-from cyy_torch_toolbox.tensor import tensor_to
 
 from .spacy import SpacyTokenizer
 
+TokenizerType: TypeAlias = SpacyTokenizer | transformers.PreTrainedTokenizerBase
+TokenContainerType: TypeAlias = transformers.BatchEncoding | torch.Tensor
 
-def get_mask_token(tokenizer: Callable) -> str:
+
+def get_mask_token(tokenizer: TokenizerType) -> str:
     match tokenizer:
         case SpacyTokenizer():
             return "<mask>"
@@ -20,66 +22,56 @@ def get_mask_token(tokenizer: Callable) -> str:
 
 
 def extract_token_indices(
-    sample_input: transformers.BatchEncoding | torch.Tensor,
-    tokenizer: Callable,
+    token_container: TokenContainerType,
+    tokenizer: TokenizerType | None = None,
     strip_special_token: bool = True,
 ) -> tuple:
-    match tokenizer:
-        case transformers.PreTrainedTokenizerBase():
-            assert isinstance(sample_input, transformers.BatchEncoding)
-            input_ids = sample_input["input_ids"].squeeze()
-            input_ids = input_ids[input_ids != tokenizer.pad_token_id]
-            res = []
-            input_ids = input_ids.view(-1).tolist()
-            if strip_special_token:
+    match token_container:
+        case transformers.BatchEncoding():
+            assert isinstance(token_container, transformers.BatchEncoding)
+            input_ids: torch.Tensor = token_container["input_ids"].squeeze()
+            if tokenizer is not None:
+                input_ids = input_ids[input_ids != tokenizer.pad_token_id]
+            if strip_special_token and tokenizer is not None:
                 if input_ids[0] == tokenizer.cls_token_id:
                     input_ids = input_ids[1:]
                 if input_ids[-1] == tokenizer.sep_token_id:
                     input_ids = input_ids[:-1]
-            res.append(tuple(input_ids))
-            return tuple(res)
-        case SpacyTokenizer():
-            assert isinstance(sample_input, torch.Tensor)
-            return tuple((word_idx,) for word_idx in sample_input.tolist())
+            return tuple(input_ids.tolist())
+        case torch.Tensor():
+            return tuple(token_container.tolist())
         case _:
             raise NotImplementedError(type(tokenizer))
 
 
-def collect_token_indices(
+def convert_to_token_indices(
     executor: Executor,
     phrase: str,
-    tokenizer: Callable | None = None,
+    tokenizer: TokenizerType | None = None,
     strip_special_token: bool = True,
-) -> torch.Tensor:
+) -> tuple:
     if tokenizer is None:
         tokenizer = executor.model_evaluator.tokenizer
+    transforms = executor.dataset_collection.get_transforms(phase=executor.phase)
+    token_container = transforms.transform_input(
+        transforms.transform_text(phrase), apply_random=False
+    )
+    token_indices = extract_token_indices(
+        token_container, tokenizer=tokenizer, strip_special_token=strip_special_token
+    )
     match tokenizer:
         case SpacyTokenizer():
-            transforms = executor.dataset_collection.get_transforms(
-                phase=executor.phase
-            )
-            word_indices = transforms.transform_input(
-                transforms.transform_text(phrase), apply_random=False
-            )
-            assert len(word_indices) == 1
-            assert tokenizer.itos[word_indices[0]] == phrase
-            return tensor_to(word_indices, device=executor.device, check_slowdown=False)
+            assert "".join(
+                tokenizer.itos[idx] for idx in token_indices
+            ) == phrase.replace(" ", "")
         case transformers.PreTrainedTokenizerBase():
-            transforms = executor.dataset_collection.get_transforms(
-                phase=executor.phase
-            )
-            sample_input = transforms.transform_inputs([phrase])
-            input_ids = extract_token_indices(
-                sample_input=sample_input,
-                tokenizer=tokenizer,
-                strip_special_token=strip_special_token,
-            )[0]
-            decoded_phrase = tokenizer.decode(input_ids)
+            decoded_phrase = tokenizer.decode(token_indices)
+            fdsds
             if decoded_phrase.replace(" ", "") != phrase.replace(" ", ""):
                 get_logger().error("failed to recover phrase")
                 get_logger().error("phrase is: %s", phrase)
                 get_logger().error("decoded phrase is: %s", decoded_phrase)
                 raise RuntimeError("failed to recover phrase")
-            return torch.tensor(input_ids, device=executor.device)
         case _:
             raise NotImplementedError()
+    return token_indices
