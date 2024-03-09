@@ -198,4 +198,4 @@ class SpacyTokenizer(Tokenizer):
         return self.itos[token_id]
 
     def strip_special_tokens(self, token_ids: TokenIDsType) -> TokenIDsType:
-        return token_ids[token_ids != self.__spacy.pad_token_id]
+        return token_ids[token_ids != self.get_token_id("<pad>")]
