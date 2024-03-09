@@ -23,14 +23,8 @@ class HuggingFaceTokenizer(Tokenizer):
         return tokens
 
     @cached_property
-    def special_token_ids(self) -> set[Any]:
-        token_ids = set()
-        for attr in self.__tokenizer.SPECIAL_token_ids_ATTRIBUTES:
-            if attr != "additional_special_token_ids" and hasattr(
-                self.__tokenizer, attr
-            ):
-                token_ids.add(getattr(self.__tokenizer, attr + "_id"))
-        return token_ids
+    def special_token_ids(self) -> set[TokenIDType]:
+        return {self.get_token_id(token) for token in self.special_tokens}
 
     @property
     def tokenizer(self) -> transformers.PreTrainedTokenizerBase:
