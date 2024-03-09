@@ -1,16 +1,7 @@
-from typing import TypeAlias
-
-import torch
-import transformers
 from cyy_naive_lib.log import get_logger
 from cyy_torch_toolbox import Executor
 
 from .base import TokenIDsType, Tokenizer
-from .spacy import SpacyTokenizer
-
-TokenizerType: TypeAlias = SpacyTokenizer | transformers.PreTrainedTokenizerBase
-TokenContainerType: TypeAlias = transformers.BatchEncoding | torch.Tensor
-TokenIDType: TypeAlias = tuple[int] | tuple[tuple[int]]
 
 
 def convert_phrase_to_token_ids(
