@@ -1,7 +1,8 @@
 import functools
 from collections import Counter, OrderedDict
-from typing import Callable, Iterable
+from typing import Any, Callable, Iterable
 
+import torch
 from cyy_naive_lib.log import get_logger
 from cyy_torch_toolbox import MachineLearningPhase
 
@@ -9,7 +10,7 @@ import spacy
 import spacy.symbols
 
 from ..dataset import TextDatasetUtil
-from .base import TokenIDType, Tokenizer
+from .base import TokenIDsType, TokenIDType, Tokenizer
 
 
 def collect_tokens(
@@ -169,6 +170,9 @@ class SpacyTokenizer(Tokenizer):
     def spacy_model(self) -> spacy.language.Language:
         return self.__spacy
 
+    def __call__(self, phrase: str) -> list[int]:
+        return [self.get_token_id(token) for token in self.tokenize(phrase)]
+
     def get_mask_token(self) -> str:
         return "<mask>"
 
@@ -184,8 +188,14 @@ class SpacyTokenizer(Tokenizer):
     def get_token_id(self, token: str) -> int:
         return self.__stoi.get(token, self.__default_index)
 
+    def get_token_ids_from_transformed_result(
+        self, transformed_result: Any
+    ) -> TokenIDsType:
+        assert isinstance(transformed_result, torch.Tensor)
+        return transformed_result
+
     def get_token(self, token_id: TokenIDType) -> str:
         return self.itos[token_id]
 
-    def __call__(self, phrase: str) -> list[int]:
-        return [self.get_token_id(token) for token in self.tokenize(phrase)]
+    def strip_special_tokens(self, token_ids: TokenIDsType) -> TokenIDsType:
+        return token_ids[token_ids != self.__spacy.pad_token_id]

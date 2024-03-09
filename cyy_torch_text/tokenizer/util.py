@@ -6,6 +6,7 @@ from cyy_naive_lib.log import get_logger
 from cyy_torch_toolbox import Executor
 
 from .spacy import SpacyTokenizer
+from .tokenizer import Tokenizer
 
 TokenizerType: TypeAlias = SpacyTokenizer | transformers.PreTrainedTokenizerBase
 TokenContainerType: TypeAlias = transformers.BatchEncoding | torch.Tensor
@@ -50,11 +51,10 @@ def convert_token_ids_to_phrase(
 def convert_phase_to_token_ids(
     executor: Executor,
     phrase: str,
-    tokenizer: TokenizerType | None = None,
     strip_special_token: bool = True,
 ) -> tuple:
-    if tokenizer is None:
-        tokenizer = executor.model_evaluator.tokenizer
+    tokenizer = executor.model_evaluator.tokenizer
+    assert isinstance(tokenizer, Tokenizer)
     transforms = executor.dataset_collection.get_transforms(phase=executor.phase)
     token_container = transforms.transform_input(
         transforms.transform_text(phrase), apply_random=False

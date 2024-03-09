@@ -1,8 +1,9 @@
 from functools import cached_property
+from typing import Any
 
 import transformers
 
-from .base import TokenIDType, Tokenizer
+from .base import TokenIDsType, TokenIDType, Tokenizer
 
 
 class HuggingFaceTokenizer(Tokenizer):
@@ -21,6 +22,16 @@ class HuggingFaceTokenizer(Tokenizer):
                 tokens.add(getattr(self.__tokenizer, attr))
         return tokens
 
+    @cached_property
+    def special_token_ids(self) -> set[Any]:
+        token_ids = set()
+        for attr in self.__tokenizer.SPECIAL_token_ids_ATTRIBUTES:
+            if attr != "additional_special_token_ids" and hasattr(
+                self.__tokenizer, attr
+            ):
+                token_ids.add(getattr(self.__tokenizer, attr + "_id"))
+        return token_ids
+
     @property
     def tokenizer(self) -> transformers.PreTrainedTokenizerBase:
         return self.__tokenizer
@@ -34,8 +45,20 @@ class HuggingFaceTokenizer(Tokenizer):
             token for token in encoding.tokens() if token not in self.special_tokens
         ]
 
+    def get_token_ids_from_transformed_result(
+        self, transformed_result: Any
+    ) -> TokenIDsType:
+        assert isinstance(transformed_result, transformers.BatchEncoding)
+        input_ids: TokenIDsType = transformed_result["input_ids"].squeeze()
+        return input_ids
+
     def get_token_id(self, token: str) -> TokenIDType:
         return self.__tokenizer.convert_tokens_to_ids(token)
 
     def get_token(self, token_id: TokenIDType) -> str:
         return self.__tokenizer.decode(token_id)
+
+    def strip_special_tokens(self, token_ids: TokenIDsType) -> TokenIDsType:
+        for special_token_id in self.special_token_ids:
+            token_ids = token_ids[token_ids != special_token_id]
+        return token_ids
