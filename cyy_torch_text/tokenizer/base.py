@@ -28,6 +28,9 @@ class Tokenizer:
     ) -> TokenIDsType:
         raise NotImplementedError()
 
+    def get_tokens_from_transformed_result(self, transformed_result: Any) -> list[str]:
+        raise NotImplementedError()
+
     def get_token(self, token_id: TokenIDType) -> str:
         raise NotImplementedError()
 
@@ -55,14 +58,11 @@ def collect_tokens(
     for util in util_list:
         assert isinstance(util, TextDatasetUtil)
         for index in range(len(util)):
-            input_text: str | list[str] = util.get_sample_text(
+            transformed_token_results = util._get_sample_input(
                 index, apply_transform=True
             )
-            match input_text:
-                case str():
-                    input_text = [input_text]
-                case _:
-                    raise NotImplementedError(type(input_text))
-            for text in input_text:
-                counter.update(tokenizer.tokenize(text))
+            tokens = tokenizer.get_tokens_from_transformed_result(
+                transformed_token_results
+            )
+            counter.update(tokens)
     return counter

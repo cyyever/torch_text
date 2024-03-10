@@ -49,6 +49,10 @@ class HuggingFaceTokenizer(Tokenizer):
         input_ids: TokenIDsType = transformed_result["input_ids"].squeeze()
         return input_ids
 
+    def get_tokens_from_transformed_result(self, transformed_result: Any) -> list[str]:
+        assert isinstance(transformed_result, transformers.BatchEncoding)
+        return transformed_result.tokens()
+
     def get_token_id(self, token: str) -> TokenIDType:
         return self.__tokenizer.convert_tokens_to_ids(token)
 

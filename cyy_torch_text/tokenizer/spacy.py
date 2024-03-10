@@ -168,6 +168,13 @@ class SpacyTokenizer(Tokenizer):
         assert isinstance(transformed_result, torch.Tensor)
         return transformed_result
 
+    def get_tokens_from_transformed_result(self, transformed_result: Any) -> list[str]:
+        assert isinstance(transformed_result, torch.Tensor)
+        return [
+            self.get_token(token_id=token_id)
+            for token_id in transformed_result.tolist()
+        ]
+
     def get_token(self, token_id: TokenIDType) -> str:
         return self.itos[token_id]
 
