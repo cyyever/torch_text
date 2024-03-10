@@ -8,7 +8,7 @@ from cyy_naive_lib.log import get_logger
 import spacy
 import spacy.symbols
 
-from .base import TokenIDsType, TokenIDType, Tokenizer
+from .base import TokenIDsType, TokenIDType, Tokenizer, collect_tokens
 
 
 def vocab(
@@ -89,7 +89,7 @@ class SpacyTokenizer(Tokenizer):
 
         counter: Counter = dc.get_cached_data(
             file="tokenizer_word_counter.pk",
-            computation_fun=functools.partial(self.collect_tokens, dc=dc),
+            computation_fun=functools.partial(collect_tokens, tokenizer=self, dc=dc),
         )
 
         if special_tokens is None:
@@ -139,6 +139,9 @@ class SpacyTokenizer(Tokenizer):
     @property
     def spacy_model(self) -> spacy.language.Language:
         return self.__spacy
+
+    def get_token_number(self) -> int:
+        return len(self.itos)
 
     def __call__(self, phrase: str) -> list[int]:
         return [self.get_token_id(token) for token in self.tokenize(phrase)]

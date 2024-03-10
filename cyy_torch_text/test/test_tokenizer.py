@@ -30,7 +30,7 @@ def test_hugging_face_tokenizer() -> None:
         dataset_name="imdb",
         model_name="hugging_face_sequence_classification_distilbert-base-cased",
     )
-    config.dc_config.dataset_kwargs["max_len"] = 300
+    config.dc_config.dataset_kwargs["input_max_len"] = 300
     trainer = config.create_trainer()
     assert isinstance(trainer.model_evaluator, TextModelEvaluator)
     tokenizer = trainer.model_evaluator.tokenizer

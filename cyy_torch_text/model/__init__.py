@@ -37,9 +37,13 @@ def get_model(
     get_logger().debug("tokenizer is %s", tokenizer)
 
     if tokenizer is not None and hasattr(tokenizer, "itos"):
+        token_num = tokenizer.get_token_number()
         for k in ("num_embeddings", "token_num"):
             if k not in kwargs:
-                final_model_kwargs[k] = len(tokenizer.itos)
+                final_model_kwargs[k] = token_num
+    input_max_len = dataset_collection.dataset_kwargs.get("input_max_len", None)
+    if input_max_len is not None:
+        final_model_kwargs["max_len"] = input_max_len
     model = create_model(model_constructor_info["constructor"], **final_model_kwargs)
 
     res = {"model": model}

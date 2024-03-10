@@ -103,9 +103,7 @@ def add_text_transforms(
         )
 
     # Input && InputBatch
-    input_max_len = dc.dataset_kwargs.get("max_len", None)
-    if input_max_len is None:
-        input_max_len = dc.dataset_kwargs.get("input_max_len", None)
+    input_max_len = dc.dataset_kwargs.get("input_max_len", None)
     if input_max_len is not None:
         get_logger().info("use input text max_len %s", input_max_len)
     apply_tokenizer_transforms(
