@@ -55,7 +55,9 @@ def collect_tokens(
     for util in util_list:
         assert isinstance(util, TextDatasetUtil)
         for index in range(len(util)):
-            input_text: str | list[str] = util.get_sample_text(index)
+            input_text: str | list[str] = util.get_sample_text(
+                index, apply_transform=True
+            )
             match input_text:
                 case str():
                     input_text = [input_text]
