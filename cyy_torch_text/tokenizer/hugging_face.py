@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Any
+from typing import Any, Mapping
 
 import transformers
 
@@ -30,8 +30,8 @@ class HuggingFaceTokenizer(Tokenizer):
     def tokenizer(self) -> transformers.PreTrainedTokenizerBase:
         return self.__tokenizer
 
-    def get_token_number(self) -> int:
-        return len(self.__tokenizer.get_vocab())
+    def get_vocab(self) -> Mapping[str, int]:
+        return self.__tokenizer.get_vocab()
 
     def get_mask_token(self) -> str:
         return self.__tokenizer.mask_token

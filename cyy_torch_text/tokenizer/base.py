@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import Any, TypeAlias
+from typing import Any, Mapping, TypeAlias
 
 import torch
 from cyy_torch_toolbox import DatasetCollection, MachineLearningPhase
@@ -11,7 +11,7 @@ TokenIDsType: TypeAlias = torch.Tensor
 
 
 class Tokenizer:
-    def get_token_number(self) -> int:
+    def get_vocab(self) -> Mapping[str, int]:
         raise NotImplementedError()
 
     def get_mask_token(self) -> str:

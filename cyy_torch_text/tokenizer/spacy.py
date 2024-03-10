@@ -1,6 +1,6 @@
 import functools
 from collections import Counter, OrderedDict
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 import torch
 from cyy_naive_lib.log import get_logger
@@ -100,7 +100,8 @@ class SpacyTokenizer(Tokenizer):
             special_tokens.add(token)
         for token in special_tokens:
             self.__spacy.tokenizer.add_special_case(
-                token, [{spacy.symbols.ORTH: token}]
+                token,
+                [{spacy.symbols.ORTH: token}],
             )
 
         # First sort by descending frequency, then lexicographically
@@ -129,7 +130,7 @@ class SpacyTokenizer(Tokenizer):
         return self.__itos
 
     @property
-    def stoi(self) -> dict:
+    def stoi(self) -> dict[str, int]:
         return self.__stoi
 
     @property
@@ -140,8 +141,8 @@ class SpacyTokenizer(Tokenizer):
     def spacy_model(self) -> spacy.language.Language:
         return self.__spacy
 
-    def get_token_number(self) -> int:
-        return len(self.itos)
+    def get_vocab(self) -> Mapping[str, int]:
+        return self.stoi
 
     def __call__(self, phrase: str) -> list[int]:
         return [self.get_token_id(token) for token in self.tokenize(phrase)]
