@@ -1,4 +1,3 @@
-
 from .base import Tokenizer
 from .hugging_face import HuggingFaceTokenizer
 from .spacy import SpacyTokenizer

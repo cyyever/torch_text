@@ -1,6 +1,10 @@
+from collections import Counter
 from typing import Any, TypeAlias
 
 import torch
+from cyy_torch_toolbox import DatasetCollection, MachineLearningPhase
+
+from ..dataset import TextDatasetUtil
 
 TokenIDType: TypeAlias = int | tuple[int] | list[int] | torch.Tensor
 TokenIDsType: TypeAlias = torch.Tensor
@@ -29,3 +33,30 @@ class Tokenizer:
 
     def strip_special_tokens(self, token_ids: TokenIDsType) -> TokenIDsType:
         raise NotImplementedError()
+
+    def collect_tokens(
+        self,
+        dc: DatasetCollection,
+        phase: MachineLearningPhase | None = None,
+    ) -> Counter:
+        counter: Counter = Counter()
+        if phase is None:
+            util_list = [
+                dc.get_dataset_util(phase=phase)
+                for phase in MachineLearningPhase
+                if dc.has_dataset(phase)
+            ]
+        else:
+            util_list = [dc.get_dataset_util(phase=phase)]
+        for util in util_list:
+            assert isinstance(util, TextDatasetUtil)
+            for index in range(len(util)):
+                input_text: str | list[str] = util.get_sample_text(index)
+                match input_text:
+                    case str():
+                        input_text = [input_text]
+                    case _:
+                        raise NotImplementedError(type(input_text))
+                for text in input_text:
+                    counter.update(self.tokenize(text))
+        return counter

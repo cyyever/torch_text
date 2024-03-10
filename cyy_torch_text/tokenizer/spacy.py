@@ -1,42 +1,14 @@
 import functools
 from collections import Counter, OrderedDict
-from typing import Any, Callable, Iterable
+from typing import Any, Iterable
 
 import torch
 from cyy_naive_lib.log import get_logger
-from cyy_torch_toolbox import MachineLearningPhase
 
 import spacy
 import spacy.symbols
 
-from ..dataset import TextDatasetUtil
 from .base import TokenIDsType, TokenIDType, Tokenizer
-
-
-def collect_tokens(
-    dc,
-    tokenizer: Callable,
-    phase: MachineLearningPhase | None = None,
-) -> Counter:
-    counter: Counter = Counter()
-
-    if phase is None:
-        util_list = [dc.get_dataset_util(phase=phase) for phase in MachineLearningPhase]
-    else:
-        util_list = [dc.get_dataset_util(phase=phase)]
-    for util in util_list:
-        assert isinstance(util, TextDatasetUtil)
-        for index in range(len(util)):
-            input_text: str | list[str] = util.get_sample_text(index)
-            match input_text:
-                case str():
-                    input_text = [input_text]
-                case _:
-                    raise NotImplementedError(type(input_text))
-            for text in input_text:
-                tokens = tokenizer(text)
-                counter.update(str(token) for token in tokens)
-    return counter
 
 
 def vocab(
@@ -117,9 +89,7 @@ class SpacyTokenizer(Tokenizer):
 
         counter: Counter = dc.get_cached_data(
             file="tokenizer_word_counter.pk",
-            computation_fun=functools.partial(
-                collect_tokens, dc=dc, tokenizer=self.__spacy.tokenizer
-            ),
+            computation_fun=functools.partial(self.collect_tokens, dc=dc),
         )
 
         if special_tokens is None:
