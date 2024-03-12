@@ -19,7 +19,9 @@ class HuggingFaceTokenizer(Tokenizer):
         tokens = set()
         for attr in self.__tokenizer.SPECIAL_TOKENS_ATTRIBUTES:
             if attr != "additional_special_tokens" and hasattr(self.__tokenizer, attr):
-                tokens.add(getattr(self.__tokenizer, attr))
+                special_token = getattr(self.__tokenizer, attr)
+                if special_token is not None:
+                    tokens.add(special_token)
         return tokens
 
     @cached_property

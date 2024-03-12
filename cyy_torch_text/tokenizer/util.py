@@ -20,11 +20,10 @@ def convert_phrase_to_token_ids(
     )
     if strip_special_token:
         token_ids = tokenizer.strip_special_tokens(token_ids)
-
-    decoded_phrase = tokenizer.get_phrase(token_ids)
-    if decoded_phrase.replace(" ", "") != phrase.replace(" ", ""):
-        get_logger().error("failed to recover phrase")
-        get_logger().error("phrase is: %s", phrase)
-        get_logger().error("decoded phrase is: %s", decoded_phrase)
-        raise RuntimeError("failed to recover phrase")
+        decoded_phrase = tokenizer.get_phrase(token_ids)
+        if decoded_phrase.replace(" ", "") != phrase.replace(" ", ""):
+            get_logger().error("failed to recover phrase")
+            get_logger().error("phrase is: %s", phrase)
+            get_logger().error("decoded phrase is: %s", decoded_phrase)
+            raise RuntimeError("failed to recover phrase")
     return token_ids
