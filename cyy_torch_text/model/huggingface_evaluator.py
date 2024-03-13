@@ -35,7 +35,7 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
     def get_input_feature(
         self, inputs: transformers.BatchEncoding
     ) -> transformers.BatchEncoding:
-        assert isinstance(inputs, transformers.BatchEncoding)
+        assert isinstance(inputs, transformers.BatchEncoding | dict)
         if "inputs_embeds" not in inputs:
             input_ids = inputs["input_ids"]
             if hasattr(self.model, "distilbert"):
