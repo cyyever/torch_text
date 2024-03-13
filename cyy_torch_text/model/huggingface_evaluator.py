@@ -1,6 +1,7 @@
 from typing import Any, Callable
 
 import torch
+import transformers
 from cyy_torch_toolbox import ModelType
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 
@@ -31,19 +32,26 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
             new_inputs.append({k: v[i].unsqueeze(dim=0) for k, v in inputs.items()})
         return {"inputs": new_inputs, "batch_dim": batch_dim}
 
-    def get_input_feature(self, inputs) -> dict:
-        input_ids = inputs["input_ids"]
-        if hasattr(self.model, "distilbert"):
-            if len(list(input_ids.shape)) == 1:
-                input_ids = input_ids.unsqueeze(dim=0)
-            embeddings = self.model.distilbert.embeddings(input_ids).detach()
-        elif hasattr(self.model, "bert"):
-            embeddings = self.model.get_input_embeddings()(input_ids).detach()
-        else:
-            raise NotImplementedError(self.model)
+    def get_input_feature(
+        self, inputs: transformers.BatchEncoding
+    ) -> transformers.BatchEncoding:
+        assert isinstance(inputs, transformers.BatchEncoding)
+        if "inputs_embeds" not in inputs:
+            input_ids = inputs["input_ids"]
+            if hasattr(self.model, "distilbert"):
+                if len(list(input_ids.shape)) == 1:
+                    input_ids = input_ids.unsqueeze(dim=0)
+                embeddings = self.model.distilbert.embeddings(input_ids).detach()
+            elif hasattr(self.model, "bert"):
+                embeddings = self.model.get_input_embeddings()(input_ids).detach()
+            else:
+                raise NotImplementedError(self.model)
+            inputs["inputs_embeds"] = embeddings
         inputs.pop("input_ids", None)
-        inputs["inputs_embeds"] = embeddings
         return inputs
+
+    def get_input_embedding(self, inputs) -> torch.Tensor:
+        return self.get_input_feature(inputs)["inputs_embeds"]
 
     def _create_input(
         self,
@@ -61,18 +69,18 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
         return "_forward_model"
 
     def _forward_model(self, **kwargs: Any) -> dict:
-        targets = kwargs["targets"]
         model_input = self._create_input(**kwargs)
         output = self.model(**model_input)
-        if kwargs.get("reduce_loss", True):
-            return {
-                "model_input": model_input,
-                "model_output": output,
-                "logits": output.logits,
-                "loss": output.loss,
-                "is_averaged_loss": True,
-                "loss_batch_size": targets.shape[0],
-            }
+        # targets = kwargs["targets"]
+        # if kwargs.get("reduce_loss", True):
+        #     return {
+        #         "model_input": model_input,
+        #         "model_output": output,
+        #         "logits": output.logits,
+        #         "loss": output.loss,
+        #         "is_averaged_loss": True,
+        #         "loss_batch_size": targets.shape[0],
+        #     }
         return self._compute_loss(output=output.logits, **kwargs)
 
     def _choose_loss_function(self) -> Callable:

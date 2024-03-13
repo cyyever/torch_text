@@ -15,6 +15,9 @@ class TextModelEvaluator(ModelEvaluator):
     def get_underlying_model_type(self) -> ModelType:
         return self.model_type
 
+    def get_input_embedding(self, inputs) -> torch.Tensor:
+        return self.get_input_feature(inputs)
+
     def split_batch_input(self, inputs, targets) -> dict:
         batch_dim: int = 0
         if isinstance(inputs, torch.Tensor):
