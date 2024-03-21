@@ -23,7 +23,6 @@ class TextModelEvaluator(ModelEvaluator):
     def split_batch_input(self, inputs, targets: Any) -> dict:
         batch_dim: int = 0
         if isinstance(inputs, torch.Tensor):
-            assert isinstance(targets, torch.Tensor)
             if (
                 batch_dim == 0
                 and inputs.shape[0] != targets.shape[0]
