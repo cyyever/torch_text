@@ -20,13 +20,19 @@ class TextModelEvaluator(ModelEvaluator):
     def get_input_embedding(self, inputs) -> torch.Tensor:
         return self.get_input_feature(inputs)
 
-    def split_batch_input(self, inputs, targets: Any) -> dict:
+    def split_batch_input(
+        self, inputs, targets: Any = None, batch_size: int | None = None
+    ) -> dict:
         batch_dim: int = 0
         if isinstance(inputs, torch.Tensor):
+            if batch_size is None and targets is not None:
+                assert isinstance(targets, torch.Tensor)
+                batch_size = targets.shape[0]
+            assert batch_size is not None
             if (
                 batch_dim == 0
-                and inputs.shape[0] != targets.shape[0]
-                and (targets is not None or inputs.shape[1] == targets.shape[0])
+                and inputs.shape[0] != batch_size
+                and inputs.shape[1] == batch_size
             ):
                 batch_dim = 1
             if batch_dim != 0:
