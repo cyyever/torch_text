@@ -1,3 +1,5 @@
+from typing import Any
+
 import torch
 from cyy_torch_toolbox import ModelEvaluator, ModelType
 
@@ -18,14 +20,14 @@ class TextModelEvaluator(ModelEvaluator):
     def get_input_embedding(self, inputs) -> torch.Tensor:
         return self.get_input_feature(inputs)
 
-    def split_batch_input(self, inputs, targets) -> dict:
+    def split_batch_input(self, inputs, targets: Any) -> dict:
         batch_dim: int = 0
         if isinstance(inputs, torch.Tensor):
             assert isinstance(targets, torch.Tensor)
             if (
                 batch_dim == 0
                 and inputs.shape[0] != targets.shape[0]
-                and inputs.shape[1] == targets.shape[0]
+                and (targets is not None or inputs.shape[1] == targets.shape[0])
             ):
                 batch_dim = 1
             if batch_dim != 0:
