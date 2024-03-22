@@ -23,7 +23,7 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
             return ModelType.TextGeneration
         return None
 
-    def split_batch_input(self, inputs, targets) -> dict:
+    def split_batch_input(self, inputs, batch_size: int) -> dict:
         batch_dim = 0
         new_inputs = []
         first_value = next(iter(inputs.values()))
