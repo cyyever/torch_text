@@ -26,11 +26,13 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
     def split_batch_input(self, inputs, batch_size: int) -> dict:
         batch_dim = 0
         new_inputs = []
-        first_value = next(iter(inputs.values()))
-        assert isinstance(first_value, torch.Tensor)
-        for i in range(first_value.size(dim=0)):
-            new_inputs.append({k: v[i].unsqueeze(dim=0) for k, v in inputs.items()})
-        return {"inputs": new_inputs, "batch_dim": batch_dim}
+        if isinstance(inputs, transformers.BatchEncoding | dict):
+            first_value = next(iter(inputs.values()))
+            assert isinstance(first_value, torch.Tensor)
+            for i in range(first_value.size(dim=0)):
+                new_inputs.append({k: v[i].unsqueeze(dim=0) for k, v in inputs.items()})
+            return {"inputs": new_inputs, "batch_dim": batch_dim}
+        return {"inputs": inputs, "batch_dim": batch_dim}
 
     def get_input_feature(
         self, inputs: transformers.BatchEncoding
