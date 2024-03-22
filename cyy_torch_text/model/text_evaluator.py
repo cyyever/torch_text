@@ -7,7 +7,7 @@ from ..tokenizer import Tokenizer
 
 
 class TextModelEvaluator(ModelEvaluator):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.tokenizer: Tokenizer = kwargs.pop("tokenizer", None)
 
@@ -20,16 +20,9 @@ class TextModelEvaluator(ModelEvaluator):
     def get_input_embedding(self, inputs) -> torch.Tensor:
         return self.get_input_feature(inputs)
 
-    def split_batch_input(
-        self, inputs, targets: Any = None, batch_size: int | None = None
-    ) -> dict:
+    def split_batch_input(self, inputs, batch_size: int) -> dict:
         batch_dim: int = 0
         if isinstance(inputs, torch.Tensor):
-            assert batch_size is None or targets is None
-            if batch_size is None and targets is not None:
-                assert isinstance(targets, torch.Tensor)
-                batch_size = targets.shape[0]
-            assert batch_size is not None
             if (
                 batch_dim == 0
                 and inputs.shape[0] != batch_size
