@@ -25,6 +25,7 @@ class TextModelEvaluator(ModelEvaluator):
     ) -> dict:
         batch_dim: int = 0
         if isinstance(inputs, torch.Tensor):
+            assert batch_size is None or targets is None
             if batch_size is None and targets is not None:
                 assert isinstance(targets, torch.Tensor)
                 batch_size = targets.shape[0]
