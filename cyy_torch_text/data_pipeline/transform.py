@@ -18,6 +18,13 @@ def add_text_extraction(dc: DatasetCollection) -> None:
     assert dc.dataset_type == DatasetType.Text
     # ExtractData
     dc.append_transform(backup_target, key=TransformType.ExtractData)
+    dataset_name: str = dc.name.lower()
+    # InputText
+    if dataset_name == "imdb":
+        dc.append_transform(
+            functools.partial(replace_str, old="<br />", new=""),
+            key=TransformType.InputText,
+        )
 
 
 def squeeze_huggingface_input(huggingface_input) -> None:
@@ -86,12 +93,6 @@ def add_text_transforms(
     assert dc.dataset_type in (DatasetType.Text, DatasetType.CodeText)
     dataset_name: str = dc.name.lower()
     # InputText
-    if dataset_name == "imdb":
-        dc.append_transform(
-            functools.partial(replace_str, old="<br />", new=""),
-            key=TransformType.InputText,
-        )
-
     assert model_evaluator.model_type is not None
     text_template = get_text_template(
         dataset_name=dataset_name, model_type=model_evaluator.model_type

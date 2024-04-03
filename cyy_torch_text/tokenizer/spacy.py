@@ -15,7 +15,6 @@ def vocab(
     ordered_dict: OrderedDict,
     min_freq: int = 1,
     specials: list[str] | None = None,
-    special_first: bool = True,
 ) -> tuple[list, dict, OrderedDict]:
     r"""Factory method for creating a vocab object which maps tokens to indices.
 
@@ -26,7 +25,6 @@ def vocab(
         ordered_dict: Ordered Dictionary mapping tokens to their corresponding occurance frequencies.
         min_freq: The minimum frequency needed to include a token in the vocabulary.
         specials: Special symbols to add. The order of supplied tokens will be preserved.
-        special_first: Indicates whether to insert symbols at the beginning or at the end.
 
     Returns:
         torchtext.vocab.Vocab: A `Vocab` object
@@ -57,15 +55,13 @@ def vocab(
         ordered_dict.pop(token, None)
 
     tokens = []
+    for token in specials:
+        tokens.append(token)
     # Save room for special tokens
     for token, freq in ordered_dict.items():
         if freq >= min_freq:
             tokens.append(token)
 
-    if special_first:
-        tokens[0:0] = specials
-    else:
-        tokens.extend(specials)
     itos = tokens
     stoi = {token: idx for idx, token in enumerate(tokens)}
     return itos, stoi, ordered_dict
@@ -82,63 +78,47 @@ class SpacyTokenizer(Tokenizer):
         min_freq: int = 1,
         max_tokens: None | int = None,
     ) -> None:
+        self.__dc = dc
         self.__keep_punct = keep_punct
         self.__keep_stop = keep_stop
+        self.__min_freq = min_freq
         self.__spacy: spacy.language.Language = spacy.load(package_name)
-        self.unusual_words: set = set()
-
-        counter: Counter = dc.get_cached_data(
-            file="tokenizer_word_counter.pk",
-            computation_fun=functools.partial(collect_tokens, tokenizer=self, dc=dc),
-        )
 
         if special_tokens is None:
-            special_tokens = set()
+            self.__special_tokens = set()
         else:
-            special_tokens = set(special_tokens)
+            self.__special_tokens = set(special_tokens)
         for token in ("<pad>", "<unk>", "<mask>", "<cls>", "<sep>"):
-            special_tokens.add(token)
-        for token in special_tokens:
-            self.__spacy.tokenizer.add_special_case(
-                token,
-                [{spacy.symbols.ORTH: token}],
-            )
-
-        # First sort by descending frequency, then lexicographically
-        sorted_by_freq_tuples = sorted(counter.items(), key=lambda x: (-x[1], x[0]))
-
-        if max_tokens is None:
-            ordered_dict = OrderedDict(sorted_by_freq_tuples)
-        else:
+            self.__special_tokens.add(token)
+        if max_tokens is not None:
             assert (
-                len(special_tokens) < max_tokens
+                len(self.__special_tokens) < max_tokens
             ), "len(special_tokens) >= max_tokens, so the vocab will be entirely special tokens."
-            ordered_dict = OrderedDict(
-                sorted_by_freq_tuples[: max_tokens - len(special_tokens)]
-            )
-        self.__itos, self.__stoi, self.__freq_dict = vocab(
-            ordered_dict,
-            min_freq=min_freq,
-            specials=list(special_tokens),
-        )
-
-        self.__default_index = self.__stoi["<unk>"]
-        get_logger().info("vocab size is %s", len(self.__stoi))
+            max_tokens = max_tokens - len(self.__special_tokens)
+        self.__max_tokens = max_tokens
+        self.__itos: list = []
+        self.__stoi: dict = {}
+        self.__freq_dict: OrderedDict = OrderedDict()
+        self.__default_index: int = -1
 
     @property
     def itos(self) -> list:
+        self.__collect_tokens()
         return self.__itos
 
     @property
     def stoi(self) -> dict[str, int]:
+        self.__collect_tokens()
         return self.__stoi
 
     @property
     def freq_dict(self) -> OrderedDict:
+        self.__collect_tokens()
         return self.__freq_dict
 
     @property
     def spacy_model(self) -> spacy.language.Language:
+        self.__collect_tokens()
         return self.__spacy
 
     def get_vocab(self) -> Mapping[str, int]:
@@ -151,7 +131,7 @@ class SpacyTokenizer(Tokenizer):
         return "<mask>"
 
     def tokenize(self, phrase: str) -> list[str]:
-        tokens = self.__spacy.tokenizer(phrase)
+        tokens = self.spacy_model.tokenizer(phrase)
         return [
             t.text
             for t in tokens
@@ -160,7 +140,7 @@ class SpacyTokenizer(Tokenizer):
         ]
 
     def get_token_id(self, token: str) -> int:
-        return self.__stoi.get(token, self.__default_index)
+        return self.stoi.get(token, self.__default_index)
 
     def get_token_ids_from_transformed_result(
         self, transformed_result: Any
@@ -169,6 +149,9 @@ class SpacyTokenizer(Tokenizer):
         return transformed_result
 
     def get_tokens_from_transformed_result(self, transformed_result: Any) -> list[str]:
+        if isinstance(transformed_result, str):
+            return self.tokenize(transformed_result)
+
         assert isinstance(transformed_result, torch.Tensor)
         return [
             self.get_token(token_id=token_id)
@@ -180,3 +163,34 @@ class SpacyTokenizer(Tokenizer):
 
     def strip_special_tokens(self, token_ids: TokenIDsType) -> TokenIDsType:
         return token_ids[token_ids != self.get_token_id("<pad>")]
+
+    def __collect_tokens(self) -> None:
+        if self.__itos:
+            return
+
+        for token in self.__special_tokens:
+            self.__spacy.tokenizer.add_special_case(
+                token,
+                [{spacy.symbols.ORTH: token}],
+            )
+        # First sort by descending frequency, then lexicographically
+        counter: Counter = self.__dc.get_cached_data(
+            file="tokenizer_word_counter.pk",
+            computation_fun=functools.partial(
+                collect_tokens, tokenizer=self, dc=self.__dc
+            ),
+        )
+        sorted_by_freq_tuples = sorted(counter.items(), key=lambda x: (-x[1], x[0]))
+
+        if self.__max_tokens is None:
+            ordered_dict = OrderedDict(sorted_by_freq_tuples)
+        else:
+            ordered_dict = OrderedDict(sorted_by_freq_tuples[: self.__max_tokens])
+        self.__itos, self.__stoi, self.__freq_dict = vocab(
+            ordered_dict,
+            min_freq=self.__min_freq,
+            specials=list(self.__special_tokens),
+        )
+
+        self.__default_index = self.__stoi["<unk>"]
+        get_logger().info("vocab size is %s", len(self.__stoi))
