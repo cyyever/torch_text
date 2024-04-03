@@ -118,7 +118,6 @@ class SpacyTokenizer(Tokenizer):
 
     @property
     def spacy_model(self) -> spacy.language.Language:
-        self.__collect_tokens()
         return self.__spacy
 
     def get_vocab(self) -> Mapping[str, int]:
