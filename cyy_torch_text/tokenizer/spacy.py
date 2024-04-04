@@ -82,6 +82,7 @@ class SpacyTokenizer(Tokenizer):
         self.__keep_punct = keep_punct
         self.__keep_stop = keep_stop
         self.__min_freq = min_freq
+        self.__package_name = package_name
         self.__spacy: spacy.language.Language = spacy.load(package_name)
 
         if special_tokens is None:
@@ -174,7 +175,7 @@ class SpacyTokenizer(Tokenizer):
             )
         # First sort by descending frequency, then lexicographically
         counter: Counter = self.__dc.get_cached_data(
-            file="tokenizer_word_counter.pk",
+            file=f"spacy_tokens_{self.__package_name}_{self.__keep_punct}_{self.__keep_stop}_{self.__max_tokens}_{'_'.join(sorted(self.__special_tokens))}.pk",
             computation_fun=functools.partial(
                 collect_tokens, tokenizer=self, dc=self.__dc
             ),
