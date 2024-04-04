@@ -30,7 +30,7 @@ class PretrainedWordVector:
         itos = tokenizer.itos
 
         def __load_embedding(name, module, module_util) -> None:
-            unknown_token_cnt = 0
+            unknown_tokens = set()
             embeddings = module.weight.tolist()
             for idx, token in enumerate(itos):
                 word_vector = self.word_vector_dict.get(token, None)
@@ -39,17 +39,16 @@ class PretrainedWordVector:
                 if word_vector is not None:
                     embeddings[idx] = word_vector
                 else:
-                    tokenizer.unusual_words.add(token)
-                    unknown_token_cnt += 1
+                    unknown_tokens.add(token)
             assert list(module.weight.shape) == [
                 len(itos),
                 len(next(iter(self.word_vector_dict.values()))),
             ], "Shape of weight does not match num_embeddings and embedding_dim"
             module.weight = nn.Parameter(torch.tensor(embeddings))
-            if unknown_token_cnt != 0:
+            if unknown_tokens:
                 get_logger().info(
                     "there are %s unrecognized tokens in word vectors for a total of %s",
-                    unknown_token_cnt,
+                    len(unknown_tokens),
                     len(itos),
                 )
 
