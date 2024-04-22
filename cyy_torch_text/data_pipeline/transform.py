@@ -1,4 +1,5 @@
 import functools
+from typing import Sequence
 
 import torch
 from cyy_naive_lib.log import get_logger
@@ -34,6 +35,19 @@ def squeeze_huggingface_input(huggingface_input) -> None:
     return huggingface_input
 
 
+def truncate(input: Sequence, max_seq_len: int) -> Sequence:
+    """Truncate input sequence or batch
+
+    :param input: Input sequence or batch to be truncated
+    :type input: Union[List[Union[str, int]], List[List[Union[str, int]]]]
+    :param max_seq_len: Maximum length beyond which input is discarded
+    :type max_seq_len: int
+    :return: Truncated sequence
+    :rtype: Union[List[Union[str, int]], List[List[Union[str, int]]]]
+    """
+    return input[:max_seq_len]
+
+
 def apply_tokenizer_transforms(
     dc: DatasetCollection,
     model_evaluator: TextModelEvaluator,
@@ -51,7 +65,7 @@ def apply_tokenizer_transforms(
             dc.append_transform(model_evaluator.tokenizer, key=key)
             if max_len is not None:
                 dc.append_transform(
-                    lambda a: a[:max_len],
+                    functools.partial(truncate, max_seq_len=max_len),
                     key=key,
                 )
             dc.append_transform(torch.LongTensor, key=key)
