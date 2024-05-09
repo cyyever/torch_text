@@ -84,7 +84,7 @@ class PretrainedWordVector:
         if url is None:
             raise RuntimeError(f"unknown word vector {self.__name}")
         tarball = TarballSource(
-            spec=PackageSpecification(self.__name),
+            spec=PackageSpecification(self.__name.replace(".", "")),
             url=url,
             root_dir=self.get_root_dir(),
             checksum=checksum,
