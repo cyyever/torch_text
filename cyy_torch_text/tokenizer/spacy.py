@@ -6,6 +6,7 @@ import torch
 from cyy_naive_lib.log import get_logger
 
 import spacy
+import spacy.cli
 import spacy.symbols
 
 from .base import TokenIDsType, TokenIDType, Tokenizer, collect_tokens
@@ -83,6 +84,8 @@ class SpacyTokenizer(Tokenizer):
         self.__keep_stop = keep_stop
         self.__min_freq = min_freq
         self.__package_name = package_name
+        if not spacy.util.is_package(package_name):
+            spacy.cli.download(package_name)
         self.__spacy: spacy.language.Language = spacy.load(package_name)
 
         if special_tokens is None:

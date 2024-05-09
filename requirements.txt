@@ -1,4 +1,5 @@
 torch
+looseversion
 nvidia-ml-py
 hydra-core
 spacy

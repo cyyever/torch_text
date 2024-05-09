@@ -3,6 +3,7 @@ import pickle
 
 import torch
 from cyy_naive_lib.log import get_logger
+from cyy_naive_lib.source_code.package_spec import PackageSpecification
 from cyy_naive_lib.source_code.tarball_source import TarballSource
 from cyy_torch_toolbox import ModelUtil
 from torch import nn
@@ -83,7 +84,10 @@ class PretrainedWordVector:
         if url is None:
             raise RuntimeError(f"unknown word vector {self.__name}")
         tarball = TarballSource(
-            spec=self.__name, url=url, root_dir=self.get_root_dir(), checksum=checksum
+            spec=PackageSpecification(self.__name),
+            url=url,
+            root_dir=self.get_root_dir(),
+            checksum=checksum,
         )
         with tarball:
             if self.__name.startswith("glove"):
