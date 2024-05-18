@@ -1,9 +1,12 @@
+import os
+
 from cyy_torch_text.model import TextModelEvaluator
 from cyy_torch_text.tokenizer import (HuggingFaceTokenizer, SpacyTokenizer,
                                       Tokenizer)
 from cyy_torch_text.tokenizer.util import convert_phrase_to_token_ids
 from cyy_torch_toolbox import Config, Executor
 
+os.environ["USE_THREAD_DATALOADER"]="1"
 
 def tokenizer_testcases(executor: Executor, tokenizer: Tokenizer) -> None:
     phrase = "hello world!"
