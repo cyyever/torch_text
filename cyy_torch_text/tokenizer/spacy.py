@@ -5,9 +5,10 @@ from typing import Any, Iterable, Mapping
 import torch
 from cyy_naive_lib.log import get_logger
 
-import spacy
 import spacy.cli
+import spacy.language
 import spacy.symbols
+import spacy.util
 
 from .base import TokenIDsType, TokenIDType, Tokenizer, collect_tokens
 
