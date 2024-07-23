@@ -58,7 +58,7 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
     def _create_input(
         self,
         inputs: dict,
-        targets: dict,
+        targets: Any,
         device: torch.device,
         **kwargs: Any,
     ) -> dict:
@@ -70,8 +70,8 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
     def get_feature_forward_fun(self) -> str:
         return "_forward_model"
 
-    def _forward_model(self, **kwargs: Any) -> dict:
-        model_input = self._create_input(**kwargs)
+    def _forward_model(self, *args: Any, **kwargs: Any) -> dict:
+        model_input = self._create_input(*args, **kwargs)
         output = self.model(**model_input)
         # targets = kwargs["targets"]
         # if kwargs.get("reduce_loss", True):
@@ -83,16 +83,14 @@ class HuggingFaceModelEvaluator(TextModelEvaluator):
         #         "is_averaged_loss": True,
         #         "loss_batch_size": targets.shape[0],
         #     }
-        return self._compute_loss(output=output.logits, **kwargs)
+        return self._compute_loss(*args, output=output.logits, **kwargs)
 
     def _choose_loss_function(self) -> Callable:
         match self.model.config.problem_type:
             case "regression":
-                loss_fun = MSELoss
+                return MSELoss()
             case "single_label_classification":
-                loss_fun = CrossEntropyLoss
+                return CrossEntropyLoss()
             case "multi_label_classification":
-                loss_fun = BCEWithLogitsLoss
-            case _:
-                raise NotImplementedError(self.model.config.problem_type)
-        return loss_fun()
+                return BCEWithLogitsLoss()
+        raise NotImplementedError(self.model.config.problem_type)

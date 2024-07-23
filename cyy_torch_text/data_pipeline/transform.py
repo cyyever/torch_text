@@ -35,7 +35,7 @@ def squeeze_huggingface_input(huggingface_input) -> None:
     return huggingface_input
 
 
-def truncate(input: Sequence, max_seq_len: int) -> Sequence:
+def truncate(input_seq: Sequence, max_seq_len: int) -> Sequence:
     """Truncate input sequence or batch
 
     :param input: Input sequence or batch to be truncated
@@ -45,7 +45,7 @@ def truncate(input: Sequence, max_seq_len: int) -> Sequence:
     :return: Truncated sequence
     :rtype: Union[List[Union[str, int]], List[List[Union[str, int]]]]
     """
-    return input[:max_seq_len]
+    return input_seq[:max_seq_len]
 
 
 def apply_tokenizer_transforms(
