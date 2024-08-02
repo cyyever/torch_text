@@ -20,7 +20,9 @@ class HunggingFaceFactory(DatasetFactory):
 
     @classmethod
     def __get_dataset(cls, path: str, cache_dir: str, split: Any, **kwargs) -> Any:
-        dataset = load_hugging_face_dataset(path=path, split=split, **kwargs)
+        dataset = load_hugging_face_dataset(
+            path=path, split=split, cache_dir=cache_dir, **kwargs
+        )
         with open(cls.__dataset_id_file(cache_dir), "wt", encoding="utf8") as f:
             f.write("1")
         return dataset
