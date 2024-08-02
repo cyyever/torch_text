@@ -1,4 +1,5 @@
 torch
+dill
 looseversion
 nvidia-ml-py
 hydra-core

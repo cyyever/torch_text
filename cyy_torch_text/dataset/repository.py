@@ -2,6 +2,7 @@ import functools
 import os
 from typing import Any
 
+import dill
 from cyy_torch_toolbox.dataset import DatasetFactory
 from datasets import load_dataset as load_hugging_face_dataset
 from datasets import load_dataset_builder
@@ -20,21 +21,29 @@ class HunggingFaceFactory(DatasetFactory):
 
     @classmethod
     def __get_dataset(cls, path: str, cache_dir: str, split: Any, **kwargs) -> Any:
+        if os.path.isfile(cls.__dataset_cache_file(cache_dir, split)):
+            with open(cls.__dataset_cache_file(cache_dir, split), "rb") as f:
+                return dill.load(f)
+
         dataset = load_hugging_face_dataset(
             path=path, split=split, cache_dir=cache_dir, **kwargs
         )
-        with open(cls.__dataset_id_file(cache_dir), "wt", encoding="utf8") as f:
-            f.write("1")
+        with open(cls.__dataset_cache_file(cache_dir, split), "wb") as f:
+            dill.dump(dataset, f)
         return dataset
 
     @classmethod
-    def __dataset_id_file(cls, cache_dir: str) -> str:
-        os.makedirs(os.path.join(cache_dir, ".cache"), exist_ok=True)
-        return os.path.join(cache_dir, ".cache", "__from_hg")
+    def __dataset_cache_dir(cls, cache_dir: str) -> str:
+        os.makedirs(os.path.join(cache_dir, ".cache", "hg_cache"), exist_ok=True)
+        return os.path.join(cache_dir, ".cache", "hg_cache")
+
+    @classmethod
+    def __dataset_cache_file(cls, cache_dir: str, split: Any) -> str:
+        return os.path.join(cls.__dataset_cache_dir(cache_dir), str(split))
 
     @classmethod
     def __has_dataset(cls, key: Any, cache_dir: str) -> bool:
-        if os.path.isfile(cls.__dataset_id_file(cache_dir)):
+        if os.path.exists(cls.__dataset_cache_dir(cache_dir)):
             return True
         try:
             load_dataset_builder(path=key)
