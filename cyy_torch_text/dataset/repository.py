@@ -1,12 +1,12 @@
 import functools
 from typing import Any
 
-from cyy_torch_toolbox import Factory
+from cyy_torch_toolbox.dataset import DatasetFactory
 from datasets import load_dataset as load_hugging_face_dataset
 from datasets import load_dataset_builder
 
 
-class HunggingFaceFactory(Factory):
+class HunggingFaceFactory(DatasetFactory):
     def get(self, key: str, case_sensitive: bool = True) -> Any:
         assert case_sensitive
         try:
