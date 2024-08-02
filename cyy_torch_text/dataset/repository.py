@@ -27,6 +27,7 @@ class HunggingFaceFactory(DatasetFactory):
 
     @classmethod
     def __dataset_id_file(cls, cache_dir: str) -> str:
+        os.makedirs(os.path.join(cache_dir, ".cache"), exist_ok=True)
         return os.path.join(cache_dir, ".cache", "__from_hg")
 
     @classmethod
