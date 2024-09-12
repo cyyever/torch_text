@@ -8,9 +8,9 @@ def convert_phrase_to_transformed_result(
     executor: Executor,
     phrase: str,
 ) -> TokenIDsType:
-    transforms = executor.dataset_collection.get_transforms(phase=executor.phase)
-    return transforms.transform_input(
-        transforms.transform_text(phrase), apply_random=False
+    dc = executor.dataset_collection.get_dataset_util(phase=executor.phase)
+    return dc.transforms.transform_input(
+        dc.transforms.transform_text(phrase), apply_random=False
     )
 
 
