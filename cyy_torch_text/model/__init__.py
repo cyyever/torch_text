@@ -47,11 +47,12 @@ class TextModelFactory(Factory):
                 model_constructor_info=model_constructors[model_name],
             )
 
-        constructor = get_huggingface_constructor(model_name)
-        if constructor is not None:
+        res = get_huggingface_constructor(model_name)
+        if res is not None:
+            constructor, name = res
             return functools.partial(
                 self.create_text_model,
-                model_constructor_info={"constructor": constructor, "name": key},
+                model_constructor_info={"constructor": constructor, "name": name},
             )
         return None
 
