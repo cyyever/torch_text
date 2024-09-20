@@ -1,4 +1,5 @@
 import functools
+from typing import Callable
 
 import transformers
 from cyy_naive_lib.log import get_logger
@@ -149,6 +150,21 @@ def __create_huggingface_model(model_name: str, pretrained: bool, **model_kwargs
     config = transformers.AutoConfig.from_pretrained(model_name, **model_kwargs)
     model = transformers.AutoModel.from_config(config)
     return model
+
+
+def get_huggingface_constructor(model_name: str) -> Callable | None:
+    prefix = "hugging_face_sequence_classification_"
+    if model_name.startswith(prefix):
+        return functools.partial(
+            __create_huggingface_sequence_classification_model, model_name
+        )
+    prefix = "hugging_face_seq2seq_lm_"
+    if model_name.startswith(prefix):
+        return functools.partial(__create_huggingface_seq2seq_lm_model, model_name)
+    prefix = "hugging_face_"
+    if model_name.startswith(prefix):
+        return functools.partial(__create_huggingface_model, model_name)
+    return None
 
 
 def get_huggingface_model_info() -> dict:
