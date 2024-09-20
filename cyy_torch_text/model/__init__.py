@@ -45,6 +45,7 @@ class TextModelFactory(Factory):
             return functools.partial(
                 self.create_text_model,
                 model_constructor_info=model_constructors[model_name],
+                is_hugging_face=False,
             )
 
         res = get_huggingface_constructor(model_name)
@@ -53,18 +54,20 @@ class TextModelFactory(Factory):
             return functools.partial(
                 self.create_text_model,
                 model_constructor_info={"constructor": constructor, "name": name},
+                is_hugging_face=True,
             )
         return None
 
     def create_text_model(
         self,
         model_constructor_info: dict,
+        is_hugging_face: bool,
         dataset_collection: DatasetCollection,
         **kwargs: Any
     ) -> dict:
         final_model_kwargs: dict = kwargs
         tokenizer_kwargs = dataset_collection.dataset_kwargs.get("tokenizer", {})
-        if "hugging_face" in kwargs.get("name", ""):
+        if is_hugging_face:
             tokenizer_kwargs["type"] = "hugging_face"
             tokenizer_kwargs["name"] = model_constructor_info["name"]
         tokenizer = get_tokenizer(dataset_collection, tokenizer_kwargs)
