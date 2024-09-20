@@ -1,3 +1,4 @@
+import base64
 import functools
 from collections import Counter, OrderedDict
 from typing import Any, Iterable, Mapping
@@ -178,8 +179,11 @@ class SpacyTokenizer(Tokenizer):
                 [{spacy.symbols.ORTH: token}],
             )
         # First sort by descending frequency, then lexicographically
+        filename = base64.b64encode(
+            f"spacy_tokens_{self.__package_name}_{self.__keep_punct}_{self.__keep_stop}_{self.__max_tokens}_{'_'.join(sorted(self.__special_tokens))}".encode()
+        )
         counter: Counter = self.__dc.get_cached_data(
-            file=f"spacy_tokens_{self.__package_name}_{self.__keep_punct}_{self.__keep_stop}_{self.__max_tokens}_{'_'.join(sorted(self.__special_tokens))}.pk",
+            file=f"{filename}.pk",
             computation_fun=functools.partial(
                 collect_tokens, tokenizer=self, dc=self.__dc
             ),
