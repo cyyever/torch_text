@@ -174,34 +174,3 @@ def get_huggingface_constructor(model_name: str) -> tuple[Callable, str] | None:
         real_name = model_name[len(prefix):]
         return functools.partial(__create_huggingface_model, real_name), real_name
     return None
-
-
-def get_huggingface_model_info() -> dict:
-    model_info: dict = {}
-    for model_name in __huggingface_models:
-        normalize_model_name = model_name.replace("/", "_")
-        full_model_name = "hugging_face_sequence_classification_" + normalize_model_name
-        model_info[full_model_name.lower()] = {
-            "name": model_name,
-            "constructor": functools.partial(
-                __create_huggingface_sequence_classification_model,
-                model_name,
-            ),
-        }
-        full_model_name = "hugging_face_" + normalize_model_name
-        model_info[full_model_name.lower()] = {
-            "name": model_name,
-            "constructor": functools.partial(
-                __create_huggingface_model,
-                model_name,
-            ),
-        }
-        full_model_name = "hugging_face_seq2seq_lm_" + normalize_model_name
-        model_info[full_model_name.lower()] = {
-            "name": model_name,
-            "constructor": functools.partial(
-                __create_huggingface_seq2seq_lm_model,
-                model_name,
-            ),
-        }
-    return model_info
