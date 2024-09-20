@@ -156,14 +156,17 @@ def get_huggingface_constructor(model_name: str) -> Callable | None:
     prefix = "hugging_face_sequence_classification_"
     if model_name.startswith(prefix):
         return functools.partial(
-            __create_huggingface_sequence_classification_model, model_name
+            __create_huggingface_sequence_classification_model,
+            model_name[len(prefix):],
         )
     prefix = "hugging_face_seq2seq_lm_"
     if model_name.startswith(prefix):
-        return functools.partial(__create_huggingface_seq2seq_lm_model, model_name)
+        return functools.partial(
+            __create_huggingface_seq2seq_lm_model, model_name[len(prefix):]
+        )
     prefix = "hugging_face_"
     if model_name.startswith(prefix):
-        return functools.partial(__create_huggingface_model, model_name)
+        return functools.partial(__create_huggingface_model, model_name[len(prefix):])
     return None
 
 
