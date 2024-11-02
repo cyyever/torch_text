@@ -126,10 +126,7 @@ def add_text_transforms(
     )
 
     # Target
-    if (
-        model_evaluator.model_type == ModelType.TextGeneration
-        or model_evaluator.get_underlying_model_type() == ModelType.TextGeneration
-    ):
+    if model_evaluator.model_type == ModelType.TextGeneration:
         mapping = get_label_to_text_mapping(dataset_name)
         if mapping is not None:
             dc.append_transform(

@@ -1,7 +1,7 @@
 from typing import Any
 
 import torch
-from cyy_torch_toolbox import ModelEvaluator, ModelType
+from cyy_torch_toolbox import ModelEvaluator
 
 from ..tokenizer import Tokenizer
 
@@ -13,9 +13,6 @@ class TextModelEvaluator(ModelEvaluator):
 
     def get_feature_forward_fun(self) -> str:
         return "forward_input_feature"
-
-    def get_underlying_model_type(self) -> ModelType:
-        return self.model_type
 
     def get_input_embedding(self, inputs) -> torch.Tensor:
         return self.get_input_feature(inputs)

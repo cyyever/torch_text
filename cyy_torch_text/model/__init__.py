@@ -10,15 +10,17 @@ from cyy_torch_toolbox.model import (create_model,
 from cyy_torch_toolbox.model.repositary import get_model_info
 
 from ..tokenizer import get_tokenizer
-from .huggingface_evaluator import HuggingFaceModelEvaluator
+from .huggingface_evaluator import HuggingFaceTextModelEvaluator
 from .huggingface_model import get_huggingface_constructor
 from .text_evaluator import TextModelEvaluator
 from .word_vector import PretrainedWordVector
 
 
-def get_model_evaluator(model, **kwargs: Any) -> TextModelEvaluator:
+def get_model_evaluator(
+    model, **kwargs: Any
+) -> TextModelEvaluator | HuggingFaceTextModelEvaluator:
     if isinstance(model, transformers.PreTrainedModel):
-        return HuggingFaceModelEvaluator(model=model, **kwargs)
+        return HuggingFaceTextModelEvaluator(model=model, **kwargs)
     return TextModelEvaluator(model=model, **kwargs)
 
 
@@ -31,6 +33,7 @@ model_constructors = get_model_info().get(DatasetType.Text, {})
 
 class TextModelFactory(Factory):
     def __init__(self, parent_factory: None | Factory = None) -> None:
+        super().__init__()
         self.__parent_factory = parent_factory
 
     def get(self, key: str, case_sensitive: bool = True) -> Callable | None:
@@ -63,7 +66,7 @@ class TextModelFactory(Factory):
         model_constructor_info: dict,
         is_hugging_face: bool,
         dataset_collection: DatasetCollection,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> dict:
         final_model_kwargs: dict = kwargs
         tokenizer_kwargs = dataset_collection.dataset_kwargs.get("tokenizer", {})
@@ -98,5 +101,6 @@ class TextModelFactory(Factory):
 
 
 for dataset_type in (DatasetType.Text, DatasetType.CodeText):
-    parent_factory = global_model_factory.get(dataset_type, None)
-    global_model_factory[dataset_type] = TextModelFactory(parent_factory=parent_factory)
+    global_model_factory[dataset_type] = TextModelFactory(
+        parent_factory=global_model_factory.get(dataset_type, None)
+    )
