@@ -8,7 +8,7 @@ from .base import TokenIDsType, TokenIDType, Tokenizer
 
 class HuggingFaceTokenizer(Tokenizer):
     def __init__(self, tokenizer_config: dict) -> None:
-        self.__tokenizer: transformers.PreTrainedTokenizerBase = (
+        self.__tokenizer: transformers.PreTrainedTokenizer = (
             transformers.AutoTokenizer.from_pretrained(
                 tokenizer_config["name"], **tokenizer_config.get("kwargs", {})
             )
@@ -25,11 +25,18 @@ class HuggingFaceTokenizer(Tokenizer):
         return tokens
 
     @cached_property
-    def special_token_ids(self) -> set[TokenIDType]:
-        return {self.get_token_id(token) for token in self.special_tokens}
+    def special_token_ids(self) -> set[int | tuple[int]]:
+        ids: set[int | tuple[int]] = set()
+        for token in self.special_tokens:
+            res: int | list[int] = self.get_token_id(token)
+            if isinstance(res, list):
+                ids.add(tuple(res))
+            else:
+                ids.add(res)
+        return ids
 
     @property
-    def tokenizer(self) -> transformers.PreTrainedTokenizerBase:
+    def tokenizer(self) -> transformers.PreTrainedTokenizer:
         return self.__tokenizer
 
     def get_vocab(self) -> Mapping[str, int]:
@@ -55,7 +62,7 @@ class HuggingFaceTokenizer(Tokenizer):
         assert isinstance(transformed_result, transformers.BatchEncoding)
         return transformed_result.tokens()
 
-    def get_token_id(self, token: str) -> TokenIDType:
+    def get_token_id(self, token: str) -> int | list[int]:
         return self.__tokenizer.convert_tokens_to_ids(token)
 
     def get_token(self, token_id: TokenIDType) -> str:

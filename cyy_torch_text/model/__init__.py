@@ -2,6 +2,7 @@ import functools
 from typing import Any, Callable
 
 import transformers
+from cyy_huggingface_toolbox import get_huggingface_constructor
 from cyy_naive_lib.log import log_debug
 from cyy_torch_toolbox import DatasetCollection, DatasetType, Factory
 from cyy_torch_toolbox.model import (create_model,
@@ -11,7 +12,6 @@ from cyy_torch_toolbox.model.repositary import get_model_info
 
 from ..tokenizer import get_tokenizer
 from .huggingface_evaluator import HuggingFaceTextModelEvaluator
-from .huggingface_model import get_huggingface_constructor
 from .text_evaluator import TextModelEvaluator
 from .word_vector import PretrainedWordVector
 

@@ -2,6 +2,7 @@ import functools
 from typing import Sequence
 
 import torch
+from cyy_huggingface_toolbox import squeeze_huggingface_input
 from cyy_naive_lib.log import get_logger
 from cyy_torch_toolbox import (DatasetCollection, DatasetType,
                                MachineLearningPhase, ModelType, TransformType)
@@ -26,13 +27,6 @@ def add_text_extraction(dc: DatasetCollection) -> None:
             functools.partial(replace_str, old="<br />", new=""),
             key=TransformType.InputText,
         )
-
-
-def squeeze_huggingface_input(huggingface_input) -> None:
-    for k in ("input_ids", "attention_mask"):
-        if k in huggingface_input:
-            huggingface_input[k] = huggingface_input[k].squeeze(dim=0)
-    return huggingface_input
 
 
 def truncate(input_seq: Sequence, max_seq_len: int) -> Sequence:
