@@ -1,5 +1,6 @@
 import functools
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import transformers
 from cyy_huggingface_toolbox import get_huggingface_constructor
@@ -93,7 +94,7 @@ class TextModelFactory(Factory):
         res = {"model": model}
         if tokenizer is not None:
             res |= {"tokenizer": tokenizer}
-            word_vector_name = kwargs.get("word_vector_name", None)
+            word_vector_name = kwargs.get("word_vector_name")
             if word_vector_name is not None:
                 PretrainedWordVector(word_vector_name).load_to_model(
                     model=model,

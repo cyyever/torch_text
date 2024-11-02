@@ -92,7 +92,7 @@ class PretrainedWordVector:
         with tarball:
             if self.__name.startswith("glove"):
                 dim = int(self.__name.split(".")[-1].replace("d", ""))
-                with open(f"{self.__name}.txt", "r", encoding="utf-8") as f:
+                with open(f"{self.__name}.txt", encoding="utf-8") as f:
                     for line in f:
                         s = line.strip().split()
                         word_vector_dict[" ".join(s[:-dim])] = torch.tensor(

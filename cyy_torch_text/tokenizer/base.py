@@ -1,5 +1,6 @@
 from collections import Counter
-from typing import Any, Mapping, TypeAlias
+from collections.abc import Mapping
+from typing import Any, TypeAlias
 
 import torch
 from cyy_torch_toolbox import DatasetCollection, MachineLearningPhase

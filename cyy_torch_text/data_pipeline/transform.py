@@ -1,5 +1,5 @@
 import functools
-from typing import Sequence
+from collections.abc import Sequence
 
 import torch
 from cyy_huggingface_toolbox import squeeze_huggingface_input

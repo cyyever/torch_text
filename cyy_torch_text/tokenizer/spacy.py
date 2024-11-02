@@ -1,15 +1,15 @@
 import base64
 import functools
 from collections import Counter, OrderedDict
-from typing import Any, Iterable, Mapping
-
-import torch
-from cyy_naive_lib.log import get_logger
+from collections.abc import Iterable, Mapping
+from typing import Any
 
 import spacy.cli
 import spacy.language
 import spacy.symbols
 import spacy.util
+import torch
+from cyy_naive_lib.log import get_logger
 
 from .base import TokenIDsType, TokenIDType, Tokenizer, collect_tokens
 
