@@ -5,9 +5,11 @@ import transformers
 from cyy_huggingface_toolbox import get_huggingface_constructor
 from cyy_naive_lib.log import log_debug
 from cyy_torch_toolbox import DatasetCollection, DatasetType, Factory
-from cyy_torch_toolbox.model import (create_model,
-                                     global_model_evaluator_factory,
-                                     global_model_factory)
+from cyy_torch_toolbox.model import (
+    create_model,
+    global_model_evaluator_factory,
+    global_model_factory,
+)
 from cyy_torch_toolbox.model.repositary import get_model_info
 
 from ..tokenizer import get_tokenizer

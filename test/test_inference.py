@@ -2,7 +2,8 @@ import os
 from cyy_torch_toolbox import Config, MachineLearningPhase
 import cyy_torch_text  # noqa: F401
 
-os.environ["USE_THREAD_DATALOADER"]="1"
+os.environ["USE_THREAD_DATALOADER"] = "1"
+
 
 def test_gradient() -> None:
     config = Config(dataset_name="imdb", model_name="simplelstm")

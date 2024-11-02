@@ -4,11 +4,18 @@ from typing import Sequence
 import torch
 from cyy_huggingface_toolbox import squeeze_huggingface_input
 from cyy_naive_lib.log import get_logger
-from cyy_torch_toolbox import (DatasetCollection, DatasetType,
-                               MachineLearningPhase, ModelType, TransformType)
-from cyy_torch_toolbox.data_pipeline.common import (backup_target,
-                                                    int_target_to_text,
-                                                    replace_str)
+from cyy_torch_toolbox import (
+    DatasetCollection,
+    DatasetType,
+    MachineLearningPhase,
+    ModelType,
+    TransformType,
+)
+from cyy_torch_toolbox.data_pipeline.common import (
+    backup_target,
+    int_target_to_text,
+    replace_str,
+)
 
 from ..model.text_evaluator import TextModelEvaluator
 from ..tokenizer.hugging_face import HuggingFaceTokenizer

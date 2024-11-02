@@ -3,7 +3,9 @@ import cyy_torch_text  # noqa: F401
 from cyy_torch_toolbox import Config, ExecutorHookPoint, StopExecutingException
 
 
-os.environ["USE_THREAD_DATALOADER"]="1"
+os.environ["USE_THREAD_DATALOADER"] = "1"
+
+
 def stop_training(*args, **kwargs):
     raise StopExecutingException()
 
