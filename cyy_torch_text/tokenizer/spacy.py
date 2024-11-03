@@ -10,8 +10,9 @@ import spacy.symbols
 import spacy.util
 import torch
 from cyy_naive_lib.log import get_logger
+from cyy_torch_toolbox import TokenIDsType, TokenIDType, Tokenizer
 
-from .base import TokenIDsType, TokenIDType, Tokenizer, collect_tokens
+from .base import collect_tokens
 
 
 def vocab(
