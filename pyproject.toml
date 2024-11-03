@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cyy_torch_text"
 version = "0.1"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 readme = {file = "README.md", content-type = "text/markdown"}
 authors = [
   {name = "cyy", email = "cyyever@outloo.com"},

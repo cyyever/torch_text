@@ -1,14 +1,14 @@
 from collections import Counter
 from collections.abc import Mapping
-from typing import Any, TypeAlias
+from typing import Any
 
 import torch
 from cyy_torch_toolbox import DatasetCollection, MachineLearningPhase
 
 from ..dataset import TextDatasetUtil
 
-TokenIDType: TypeAlias = int | tuple[int] | list[int] | torch.Tensor
-TokenIDsType: TypeAlias = torch.Tensor
+type TokenIDType = int | tuple[int] | list[int] | torch.Tensor
+type TokenIDsType = torch.Tensor
 
 
 class Tokenizer:
