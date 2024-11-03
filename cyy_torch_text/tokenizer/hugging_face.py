@@ -2,9 +2,9 @@ from collections.abc import Mapping
 from functools import cached_property
 from typing import Any
 
+import torch
 import transformers
-
-from .base import TokenIDsType, TokenIDType, Tokenizer
+from cyy_torch_toolbox import TokenIDsType, TokenIDType, Tokenizer
 
 
 class HuggingFaceTokenizer(Tokenizer):
@@ -56,8 +56,9 @@ class HuggingFaceTokenizer(Tokenizer):
         self, transformed_result: Any
     ) -> TokenIDsType:
         assert isinstance(transformed_result, transformers.BatchEncoding)
-        input_ids: TokenIDsType = transformed_result["input_ids"].squeeze()
-        return input_ids
+        input_ids_tensor = transformed_result["input_ids"]
+        assert isinstance(input_ids_tensor, torch.Tensor)
+        return input_ids_tensor.squeeze()
 
     def get_tokens_from_transformed_result(self, transformed_result: Any) -> list[str]:
         assert isinstance(transformed_result, transformers.BatchEncoding)
