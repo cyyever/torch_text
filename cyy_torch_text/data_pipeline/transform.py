@@ -2,7 +2,7 @@ import functools
 from collections.abc import Sequence
 
 import torch
-from cyy_huggingface_toolbox import squeeze_huggingface_input
+from cyy_huggingface_toolbox import HuggingFaceTokenizer, squeeze_huggingface_input
 from cyy_naive_lib.log import get_logger
 from cyy_torch_toolbox import (
     DatasetCollection,
@@ -18,7 +18,6 @@ from cyy_torch_toolbox.data_pipeline.common import (
 )
 
 from ..model.text_evaluator import TextModelEvaluator
-from ..tokenizer.hugging_face import HuggingFaceTokenizer
 from ..tokenizer.spacy import SpacyTokenizer
 from .template import get_text_template, interpret_template
 

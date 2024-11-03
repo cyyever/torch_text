@@ -1,7 +1,5 @@
 from cyy_naive_lib.log import get_logger
-from cyy_torch_toolbox import Executor
-
-from .base import TokenIDsType, Tokenizer
+from cyy_torch_toolbox import Executor, TokenIDsType, Tokenizer
 
 
 def convert_phrase_to_transformed_result(

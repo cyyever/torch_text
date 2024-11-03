@@ -1,5 +1,6 @@
+from cyy_huggingface_toolbox import HuggingFaceTokenizer
+
 from .base import Tokenizer
-from .hugging_face import HuggingFaceTokenizer
 from .spacy import SpacyTokenizer
 
 
