@@ -3,7 +3,10 @@ from collections.abc import Callable
 from typing import Any
 
 import transformers
-from cyy_huggingface_toolbox import get_huggingface_constructor
+from cyy_huggingface_toolbox import (
+    HuggingFaceModelEvaluator,
+    get_huggingface_constructor,
+)
 from cyy_naive_lib.log import log_debug
 from cyy_torch_toolbox import DatasetCollection, DatasetType, Factory
 from cyy_torch_toolbox.model import (
@@ -14,16 +17,15 @@ from cyy_torch_toolbox.model import (
 from cyy_torch_toolbox.model.repositary import get_model_info
 
 from ..tokenizer import get_tokenizer
-from .huggingface_evaluator import HuggingFaceTextModelEvaluator
 from .text_evaluator import TextModelEvaluator
 from .word_vector import PretrainedWordVector
 
 
 def get_model_evaluator(
     model, **kwargs: Any
-) -> TextModelEvaluator | HuggingFaceTextModelEvaluator:
+) -> TextModelEvaluator | HuggingFaceModelEvaluator:
     if isinstance(model, transformers.PreTrainedModel):
-        return HuggingFaceTextModelEvaluator(model=model, **kwargs)
+        return HuggingFaceModelEvaluator(model=model, **kwargs)
     return TextModelEvaluator(model=model, **kwargs)
 
 
