@@ -1,6 +1,7 @@
 import os
 
-from cyy_torch_text.model import HuggingFaceTextModelEvaluator, TextModelEvaluator
+from cyy_huggingface_toolbox import HuggingFaceModelEvaluator
+from cyy_torch_text.model import TextModelEvaluator
 from cyy_torch_text.tokenizer import HuggingFaceTokenizer, SpacyTokenizer, Tokenizer
 from cyy_torch_text.tokenizer.util import convert_phrase_to_token_ids
 from cyy_torch_toolbox import Config, Executor
@@ -35,7 +36,7 @@ def test_hugging_face_tokenizer() -> None:
     )
     config.dc_config.dataset_kwargs["input_max_len"] = 300
     trainer = config.create_trainer()
-    assert isinstance(trainer.model_evaluator, HuggingFaceTextModelEvaluator)
+    assert isinstance(trainer.model_evaluator, HuggingFaceModelEvaluator)
     tokenizer = trainer.model_evaluator.tokenizer
     assert isinstance(tokenizer, HuggingFaceTokenizer)
     tokenizer_testcases(executor=trainer, tokenizer=tokenizer)
