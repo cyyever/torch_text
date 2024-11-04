@@ -2,11 +2,7 @@ import functools
 from collections.abc import Callable
 from typing import Any
 
-import transformers
-from cyy_huggingface_toolbox import (
-    HuggingFaceModelEvaluator,
-    get_huggingface_constructor,
-)
+import cyy_huggingface_toolbox.model  # noqa: F401
 from cyy_naive_lib.log import log_debug
 from cyy_torch_toolbox import DatasetCollection, DatasetType, Factory
 from cyy_torch_toolbox.model import (
@@ -21,16 +17,12 @@ from .text_evaluator import TextModelEvaluator
 from .word_vector import PretrainedWordVector
 
 
-def get_model_evaluator(
-    model, **kwargs: Any
-) -> TextModelEvaluator | HuggingFaceModelEvaluator:
-    if isinstance(model, transformers.PreTrainedModel):
-        return HuggingFaceModelEvaluator(model=model, **kwargs)
+def __get_model_evaluator(model, **kwargs: Any) -> TextModelEvaluator:
     return TextModelEvaluator(model=model, **kwargs)
 
 
-global_model_evaluator_factory.register(DatasetType.Text, get_model_evaluator)
-global_model_evaluator_factory.register(DatasetType.CodeText, get_model_evaluator)
+global_model_evaluator_factory.register(DatasetType.Text, [__get_model_evaluator])
+global_model_evaluator_factory.register(DatasetType.CodeText, [__get_model_evaluator])
 
 
 model_constructors = get_model_info().get(DatasetType.Text, {})
@@ -41,7 +33,7 @@ class TextModelFactory(Factory):
         super().__init__()
         self.__parent_factory = parent_factory
 
-    def get(self, key: str, case_sensitive: bool = True) -> Callable | None:
+    def get(self, key: str, case_sensitive: bool = False) -> Callable | None:
         if self.__parent_factory is not None:
             res = self.__parent_factory.get(key=key, case_sensitive=case_sensitive)
             if res is not None:
@@ -51,33 +43,20 @@ class TextModelFactory(Factory):
         model_name = key
         if model_name in model_constructors:
             return functools.partial(
-                self.create_text_model,
+                self.__create_text_model,
                 model_constructor_info=model_constructors[model_name],
-                is_hugging_face=False,
             )
 
-        res = get_huggingface_constructor(model_name)
-        if res is not None:
-            constructor, name = res
-            return functools.partial(
-                self.create_text_model,
-                model_constructor_info={"constructor": constructor, "name": name},
-                is_hugging_face=True,
-            )
         return None
 
-    def create_text_model(
+    def __create_text_model(
         self,
         model_constructor_info: dict,
-        is_hugging_face: bool,
         dataset_collection: DatasetCollection,
         **kwargs: Any,
     ) -> dict:
         final_model_kwargs: dict = kwargs
         tokenizer_kwargs = dataset_collection.dataset_kwargs.get("tokenizer", {})
-        if is_hugging_face:
-            tokenizer_kwargs["type"] = "hugging_face"
-            tokenizer_kwargs["name"] = model_constructor_info["name"]
         tokenizer = get_tokenizer(dataset_collection, tokenizer_kwargs)
         log_debug("tokenizer is %s", tokenizer)
 
