@@ -2,6 +2,7 @@ import functools
 from collections.abc import Sequence
 
 import torch
+import transformers
 from cyy_huggingface_toolbox import HuggingFaceTokenizer, squeeze_huggingface_input
 from cyy_naive_lib.log import get_logger
 from cyy_torch_toolbox import (
@@ -77,6 +78,7 @@ def apply_tokenizer_transforms(
                 key=batch_key,
             )
         case HuggingFaceTokenizer():
+            assert max_len is not None
             dc.append_transform(
                 functools.partial(
                     model_evaluator.tokenizer.tokenizer,
@@ -88,6 +90,16 @@ def apply_tokenizer_transforms(
                 key=key,
             )
             dc.append_transform(squeeze_huggingface_input, key=key)
+            dc.append_transform(
+                functools.partial(
+                    transformers.DataCollatorWithPadding(
+                        tokenizer=model_evaluator.tokenizer.tokenizer,
+                        padding="max_length",
+                        max_length=max_len,
+                    )
+                ),
+                key=batch_key,
+            )
         case _:
             raise NotImplementedError(type(model_evaluator.tokenizer))
 
