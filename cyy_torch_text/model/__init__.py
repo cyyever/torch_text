@@ -38,9 +38,7 @@ class TextModelFactory(Factory):
             res = self.__parent_factory.get(key=key, case_sensitive=case_sensitive)
             if res is not None:
                 return res
-        if not case_sensitive:
-            key = self._lower_key(key)
-        model_name = key
+        model_name = self._lower_key(key)
         if model_name in model_constructors:
             return functools.partial(
                 self.__create_text_model,
