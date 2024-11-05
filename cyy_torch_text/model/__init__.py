@@ -29,15 +29,7 @@ model_constructors = get_model_info().get(DatasetType.Text, {})
 
 
 class TextModelFactory(Factory):
-    def __init__(self, parent_factory: None | Factory = None) -> None:
-        super().__init__()
-        self.__parent_factory = parent_factory
-
     def get(self, key: str, case_sensitive: bool = True) -> Callable | None:
-        if self.__parent_factory is not None:
-            res = self.__parent_factory.get(key=key, case_sensitive=case_sensitive)
-            if res is not None:
-                return res
         model_name = self._lower_key(key)
         if model_name in model_constructors:
             return functools.partial(
@@ -83,6 +75,4 @@ class TextModelFactory(Factory):
 
 
 for dataset_type in (DatasetType.Text, DatasetType.CodeText):
-    global_model_factory[dataset_type] = TextModelFactory(
-        parent_factory=global_model_factory.get(dataset_type, None)
-    )
+    global_model_factory[dataset_type] = [TextModelFactory()]
