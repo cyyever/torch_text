@@ -2,8 +2,10 @@ import functools
 from collections.abc import Sequence
 
 import torch
-import transformers
-from cyy_huggingface_toolbox import HuggingFaceTokenizer, squeeze_huggingface_input
+from cyy_huggingface_toolbox import HuggingFaceModelEvaluator, HuggingFaceTokenizer
+from cyy_huggingface_toolbox import (
+    apply_tokenizer_transforms as apply_hg_tokenizer_transforms,
+)
 from cyy_naive_lib.log import get_logger
 from cyy_torch_toolbox import (
     DatasetCollection,
@@ -51,7 +53,7 @@ def truncate(input_seq: Sequence, max_seq_len: int) -> Sequence:
 
 def apply_tokenizer_transforms(
     dc: DatasetCollection,
-    model_evaluator: TextModelEvaluator,
+    model_evaluator: TextModelEvaluator | HuggingFaceModelEvaluator,
     max_len: int | None,
     for_input: bool,
 ) -> None:
@@ -78,27 +80,12 @@ def apply_tokenizer_transforms(
                 key=batch_key,
             )
         case HuggingFaceTokenizer():
-            assert max_len is not None
-            dc.append_transform(
-                functools.partial(
-                    model_evaluator.tokenizer.tokenizer,
-                    max_length=max_len,
-                    padding="max_length",
-                    return_tensors="pt",
-                    truncation=True,
-                ),
-                key=key,
-            )
-            dc.append_transform(squeeze_huggingface_input, key=key)
-            dc.append_transform(
-                functools.partial(
-                    transformers.DataCollatorWithPadding(
-                        tokenizer=model_evaluator.tokenizer.tokenizer,
-                        padding="max_length",
-                        max_length=max_len,
-                    )
-                ),
-                key=batch_key,
+            assert isinstance(model_evaluator, HuggingFaceModelEvaluator)
+            apply_hg_tokenizer_transforms(
+                dc=dc,
+                model_evaluator=model_evaluator,
+                max_len=max_len,
+                for_input=for_input,
             )
         case _:
             raise NotImplementedError(type(model_evaluator.tokenizer))
