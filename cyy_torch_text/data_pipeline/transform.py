@@ -59,8 +59,6 @@ def apply_tokenizer_transforms(
                 ),
                 key=batch_key,
             )
-        case _:
-            raise NotImplementedError(type(model_evaluator.tokenizer))
 
 
 def get_label_to_text_mapping(dataset_name: str) -> dict | None:
