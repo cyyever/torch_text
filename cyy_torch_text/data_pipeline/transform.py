@@ -14,10 +14,6 @@ from ..tokenizer.spacy import SpacyTokenizer
 from .template import get_text_template, interpret_template
 
 
-def add_text_extraction(dc: DatasetCollection) -> None:
-    assert dc.dataset_type == DatasetType.Text
-
-
 def truncate(input_seq: Sequence, max_seq_len: int) -> Sequence:
     """Truncate input sequence or batch
 
