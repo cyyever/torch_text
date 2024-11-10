@@ -72,15 +72,15 @@ def add_text_transforms(
     assert dc.dataset_type in (DatasetType.Text, DatasetType.CodeText)
     dataset_name: str = dc.name.lower()
     # InputText
-    assert model_evaluator.model_type is not None
-    text_template = get_text_template(
-        dataset_name=dataset_name, model_type=model_evaluator.model_type
-    )
-    if text_template is not None:
-        dc.append_transform(
-            functools.partial(interpret_template, template=text_template),
-            key=TransformType.InputText,
-        )
+    # assert model_evaluator.model_type is not None
+    # text_template = get_text_template(
+    #     dataset_name=dataset_name, model_type=model_evaluator.model_type
+    # )
+    # if text_template is not None:
+    #     dc.append_transform(
+    #         functools.partial(interpret_template, template=text_template),
+    #         key=TransformType.InputText,
+    #     )
 
     # Input && InputBatch
     input_max_len = dc.dataset_kwargs.get("input_max_len", None)
