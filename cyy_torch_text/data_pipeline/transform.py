@@ -11,7 +11,6 @@ from cyy_torch_toolbox import (
 
 from ..model.text_evaluator import TextModelEvaluator
 from ..tokenizer.spacy import SpacyTokenizer
-from .template import get_text_template, interpret_template
 
 
 def truncate(input_seq: Sequence, max_seq_len: int) -> Sequence:
