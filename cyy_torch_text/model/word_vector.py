@@ -2,7 +2,7 @@ import os
 import pickle
 
 import torch
-from cyy_naive_lib.log import log_info, log_debug
+from cyy_naive_lib.log import log_debug, log_info
 from cyy_naive_lib.source_code.package_spec import PackageSpecification
 from cyy_naive_lib.source_code.tarball_source import TarballSource
 from cyy_torch_toolbox import ModelUtil
@@ -58,7 +58,7 @@ class PretrainedWordVector:
 
     @classmethod
     def get_root_dir(cls) -> str:
-        return os.getenv("pytorch_word_vector_root_dir", cls.__word_vector_root_dir)
+        return os.getenv("PYTORCH_WORD_VECTOR_ROOT_DIR", cls.__word_vector_root_dir)
 
     def __download(self) -> dict:
         word_vector_dict: dict = {}
