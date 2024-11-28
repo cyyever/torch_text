@@ -9,7 +9,7 @@ import spacy.language
 import spacy.symbols
 import spacy.util
 import torch
-from cyy_naive_lib.log import get_logger
+from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import TokenIDsType, TokenIDType, Tokenizer
 
 from .base import collect_tokens
@@ -182,7 +182,7 @@ class SpacyTokenizer(Tokenizer):
         # First sort by descending frequency, then lexicographically
         filename = base64.b64encode(
             f"spacy_tokens_{self.__package_name}_{self.__keep_punct}_{self.__keep_stop}_{self.__max_tokens}_{'_'.join(sorted(self.__special_tokens))}".encode()
-        )
+        ).decode()
         counter: Counter = self.__dc.get_cached_data(
             file=f"{filename}.pk",
             computation_fun=functools.partial(
@@ -202,4 +202,4 @@ class SpacyTokenizer(Tokenizer):
         )
 
         self.__default_index = self.__stoi["<unk>"]
-        get_logger().info("vocab size is %s", len(self.__stoi))
+        log_info("vocab size is %s", len(self.__stoi))

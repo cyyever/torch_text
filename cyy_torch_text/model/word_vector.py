@@ -2,7 +2,7 @@ import os
 import pickle
 
 import torch
-from cyy_naive_lib.log import get_logger
+from cyy_naive_lib.log import log_info, log_debug
 from cyy_naive_lib.source_code.package_spec import PackageSpecification
 from cyy_naive_lib.source_code.tarball_source import TarballSource
 from cyy_torch_toolbox import ModelUtil
@@ -47,13 +47,13 @@ class PretrainedWordVector:
             ], "Shape of weight does not match num_embeddings and embedding_dim"
             module.weight = nn.Parameter(torch.tensor(embeddings))
             if unknown_tokens:
-                get_logger().info(
+                log_info(
                     "there are %s unrecognized tokens in word vectors for a total of %s",
                     len(unknown_tokens),
                     len(itos),
                 )
 
-        get_logger().debug("load word vector %s", self.__name)
+        log_debug("load word vector %s", self.__name)
         ModelUtil(model).change_modules(f=__load_embedding, module_type=nn.Embedding)
 
     @classmethod
@@ -75,7 +75,7 @@ class PretrainedWordVector:
         pickle_file = os.path.join(self.get_root_dir(), self.__name + ".pkl")
         if os.path.exists(pickle_file):
             with open(pickle_file, "rb") as f:
-                get_logger().info("load cached word vectors")
+                log_info("load cached word vectors")
                 return pickle.load(f)
         urls["glove.6B.50d"] = urls["glove.6B.300d"]
         urls["glove.6B.100d"] = urls["glove.6B.300d"]

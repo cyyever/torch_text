@@ -2,7 +2,7 @@ import functools
 from collections.abc import Sequence
 
 import torch
-from cyy_naive_lib.log import get_logger
+from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import (
     DatasetCollection,
     DatasetType,
@@ -69,22 +69,10 @@ def add_text_transforms(
     dc: DatasetCollection, model_evaluator: TextModelEvaluator
 ) -> None:
     assert dc.dataset_type in (DatasetType.Text, DatasetType.CodeText)
-    dataset_name: str = dc.name.lower()
-    # InputText
-    # assert model_evaluator.model_type is not None
-    # text_template = get_text_template(
-    #     dataset_name=dataset_name, model_type=model_evaluator.model_type
-    # )
-    # if text_template is not None:
-    #     dc.append_transform(
-    #         functools.partial(interpret_template, template=text_template),
-    #         key=TransformType.InputText,
-    #     )
-
     # Input && InputBatch
     input_max_len = dc.dataset_kwargs.get("input_max_len", None)
     if input_max_len is not None:
-        get_logger().info("use input text max_len %s", input_max_len)
+        log_info("use input text max_len %s", input_max_len)
     apply_tokenizer_transforms(
         dc=dc, model_evaluator=model_evaluator, max_len=input_max_len, for_input=True
     )
