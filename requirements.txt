@@ -1,2 +1,2 @@
 spacy
-cyy_huggingface_toolbox@git+https://git@github.com/cyyever/huggingface_toolbox.git@main
+cyy_huggingface_toolbox@https://git@github.com/cyyever/huggingface_toolbox.git@main
