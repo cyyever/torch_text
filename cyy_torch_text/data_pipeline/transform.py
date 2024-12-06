@@ -6,8 +6,8 @@ from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import (
     DatasetCollection,
     DatasetType,
-    TransformType,
 )
+from cyy_torch_toolbox.data_pipeline.transform import Transform
 
 from ..model.text_evaluator import TextModelEvaluator
 from ..tokenizer.spacy import SpacyTokenizer
@@ -34,23 +34,22 @@ def apply_tokenizer_transforms(
     max_len = dc.dataset_kwargs.get("input_max_len", None)
     if max_len is not None:
         log_info("use input text max_len %s", max_len)
-    batch_key = TransformType.InputBatch
-    key = TransformType.Input
     match model_evaluator.tokenizer:
         case SpacyTokenizer():
-            dc.append_transform(model_evaluator.tokenizer, key=key)
+            dc.append_named_transform(Transform(fun=model_evaluator.tokenizer))
             if max_len is not None:
-                dc.append_transform(
-                    functools.partial(truncate, max_seq_len=max_len),
-                    key=key,
+                dc.append_named_transform(
+                    Transform(fun=functools.partial(truncate, max_seq_len=max_len))
                 )
-            dc.append_transform(torch.LongTensor, key=key)
-            dc.append_transform(
-                functools.partial(
-                    torch.nn.utils.rnn.pad_sequence,
-                    padding_value=model_evaluator.tokenizer.get_token_id("<pad>"),
-                ),
-                key=batch_key,
+            dc.append_named_transform(Transform(fun=torch.LongTensor))
+            dc.append_named_transform(
+                Transform(
+                    fun=functools.partial(
+                        torch.nn.utils.rnn.pad_sequence,
+                        padding_value=model_evaluator.tokenizer.get_token_id("<pad>"),
+                    ),
+                    for_batch=True,
+                )
             )
 
 
