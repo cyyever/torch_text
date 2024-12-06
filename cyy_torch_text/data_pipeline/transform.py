@@ -30,14 +30,9 @@ def apply_tokenizer_transforms(
     dc: DatasetCollection,
     model_evaluator: TextModelEvaluator,
     max_len: int | None,
-    for_input: bool,
 ) -> None:
-    if for_input:
-        batch_key = TransformType.InputBatch
-        key = TransformType.Input
-    else:
-        batch_key = TransformType.TargetBatch
-        key = TransformType.Target
+    batch_key = TransformType.InputBatch
+    key = TransformType.Input
     match model_evaluator.tokenizer:
         case SpacyTokenizer():
             dc.append_transform(model_evaluator.tokenizer, key=key)
@@ -74,5 +69,5 @@ def add_text_transforms(
     if input_max_len is not None:
         log_info("use input text max_len %s", input_max_len)
     apply_tokenizer_transforms(
-        dc=dc, model_evaluator=model_evaluator, max_len=input_max_len, for_input=True
+        dc=dc, model_evaluator=model_evaluator, max_len=input_max_len
     )

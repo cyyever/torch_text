@@ -203,3 +203,16 @@ class SpacyTokenizer(Tokenizer):
 
         self.__default_index = self.__stoi["<unk>"]
         log_info("vocab size is %s", len(self.__stoi))
+
+    def split_batch_input(self, inputs: torch.Tensor, batch_size: int) -> dict:
+        batch_dim: int = 0
+        if isinstance(inputs, torch.Tensor):
+            if (
+                batch_dim == 0
+                and inputs.shape[0] != batch_size
+                and inputs.shape[1] == batch_size
+            ):
+                batch_dim = 1
+            if batch_dim != 0:
+                inputs = inputs.permute(batch_dim, 0)
+        return {"inputs": inputs, "batch_dim": batch_dim}
