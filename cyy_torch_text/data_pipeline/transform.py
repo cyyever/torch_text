@@ -29,8 +29,11 @@ def truncate(input_seq: Sequence, max_seq_len: int) -> Sequence:
 def apply_tokenizer_transforms(
     dc: DatasetCollection,
     model_evaluator: TextModelEvaluator,
-    max_len: int | None,
 ) -> None:
+    # Input && InputBatch
+    max_len = dc.dataset_kwargs.get("input_max_len", None)
+    if max_len is not None:
+        log_info("use input text max_len %s", max_len)
     batch_key = TransformType.InputBatch
     key = TransformType.Input
     match model_evaluator.tokenizer:
@@ -64,10 +67,4 @@ def add_text_transforms(
     dc: DatasetCollection, model_evaluator: TextModelEvaluator
 ) -> None:
     assert dc.dataset_type in (DatasetType.Text, DatasetType.CodeText)
-    # Input && InputBatch
-    input_max_len = dc.dataset_kwargs.get("input_max_len", None)
-    if input_max_len is not None:
-        log_info("use input text max_len %s", input_max_len)
-    apply_tokenizer_transforms(
-        dc=dc, model_evaluator=model_evaluator, max_len=input_max_len
-    )
+    apply_tokenizer_transforms(dc=dc, model_evaluator=model_evaluator)
