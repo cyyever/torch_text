@@ -151,7 +151,6 @@ class SpacyTokenizer(Tokenizer):
     def get_token_ids_from_transformed_result(
         self, transformed_result: Any
     ) -> TokenIDsType:
-        print(transformed_result)
         if isinstance(transformed_result[0], str):
             return torch.tensor(
                 [self.get_token_id(s) for s in transformed_result], dtype=torch.int64
