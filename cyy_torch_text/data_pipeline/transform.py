@@ -50,7 +50,11 @@ def apply_tokenizer_transforms(
                     )
                 )
             dc.append_named_transform(
-                Transform(fun=torch.LongTensor, component="input", cacheable=True)
+                Transform(
+                    fun=torch.LongTensor,
+                    component="input",
+                    cacheable=True,
+                )
             )
             dc.append_named_transform(
                 Transform(
@@ -58,6 +62,7 @@ def apply_tokenizer_transforms(
                         torch.nn.utils.rnn.pad_sequence,
                         padding_value=model_evaluator.tokenizer.get_token_id("<pad>"),
                     ),
+                    component="input",
                     for_batch=True,
                 )
             )
