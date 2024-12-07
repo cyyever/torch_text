@@ -37,17 +37,20 @@ def apply_tokenizer_transforms(
     match model_evaluator.tokenizer:
         case SpacyTokenizer():
             dc.append_named_transform(
-                Transform(fun=model_evaluator.tokenizer, component="input")
+                Transform(
+                    fun=model_evaluator.tokenizer, component="input", cacheable=True
+                )
             )
             if max_len is not None:
                 dc.append_named_transform(
                     Transform(
                         fun=functools.partial(truncate, max_seq_len=max_len),
                         component="input",
+                        cacheable=True,
                     )
                 )
             dc.append_named_transform(
-                Transform(fun=torch.LongTensor, component="input")
+                Transform(fun=torch.LongTensor, component="input", cacheable=True)
             )
             dc.append_named_transform(
                 Transform(
