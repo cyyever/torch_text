@@ -7,7 +7,7 @@ from cyy_torch_toolbox import (
     DatasetCollection,
     DatasetType,
 )
-from cyy_torch_toolbox.data_pipeline.transform import Transform
+from cyy_torch_toolbox.data_pipeline.transform import BatchTransform, Transform
 
 from ..model.text_evaluator import TextModelEvaluator
 from ..tokenizer.spacy import SpacyTokenizer
@@ -57,13 +57,12 @@ def apply_tokenizer_transforms(
                 )
             )
             dc.append_named_transform(
-                Transform(
+                BatchTransform(
                     fun=functools.partial(
                         torch.nn.utils.rnn.pad_sequence,
                         padding_value=model_evaluator.tokenizer.get_token_id("<pad>"),
                     ),
                     component="input",
-                    for_batch=True,
                 )
             )
 
