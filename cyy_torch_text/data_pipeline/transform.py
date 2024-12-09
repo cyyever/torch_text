@@ -67,15 +67,6 @@ def apply_tokenizer_transforms(
             )
 
 
-def get_label_to_text_mapping(dataset_name: str) -> dict | None:
-    match dataset_name.lower():
-        case "multi_nli":
-            return {0: "entailment", 1: "neutral", 2: "contradiction"}
-        case "imdb":
-            return {0: "negative", 1: "positive"}
-    return None
-
-
 def add_text_transforms(
     dc: DatasetCollection, model_evaluator: TextModelEvaluator
 ) -> None:

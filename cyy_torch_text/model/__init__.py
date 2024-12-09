@@ -29,7 +29,9 @@ model_constructors = get_model_info().get(DatasetType.Text, {})
 
 
 class TextModelFactory(Factory):
-    def get(self, key: str, case_sensitive: bool = True) -> Callable | None:
+    def get(
+        self, key: str, case_sensitive: bool = True, default: Any = None
+    ) -> Callable | None:
         model_name = self._lower_key(key)
         if model_name in model_constructors:
             return functools.partial(
@@ -37,7 +39,7 @@ class TextModelFactory(Factory):
                 model_constructor_info=model_constructors[model_name],
             )
 
-        return None
+        return default
 
     def __create_text_model(
         self,
@@ -62,7 +64,7 @@ class TextModelFactory(Factory):
             model_constructor_info["constructor"], **final_model_kwargs
         )
 
-        res = {"model": model}
+        res: dict[str, Any] = {"model": model}
         if tokenizer is not None:
             res |= {"tokenizer": tokenizer}
             word_vector_name = kwargs.get("word_vector_name")
