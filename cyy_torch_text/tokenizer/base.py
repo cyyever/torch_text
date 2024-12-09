@@ -1,8 +1,11 @@
 from collections import Counter
 
-from cyy_torch_toolbox import DatasetCollection, MachineLearningPhase, Tokenizer
-
-from ..dataset import TextDatasetUtil
+from cyy_torch_toolbox import (
+    DatasetCollection,
+    DatasetUtil,
+    MachineLearningPhase,
+    Tokenizer,
+)
 
 
 def collect_tokens(
@@ -20,11 +23,9 @@ def collect_tokens(
     else:
         util_list = [dc.get_dataset_util(phase=phase)]
     for util in util_list:
-        assert isinstance(util, TextDatasetUtil)
+        assert isinstance(util, DatasetUtil)
         for index in range(len(util)):
-            transformed_token_results = util._get_sample_input(
-                index, apply_transform=True
-            )
+            transformed_token_results = util._get_sample_input(index)
             tokens = tokenizer.get_tokens_from_transformed_result(
                 transformed_token_results
             )
