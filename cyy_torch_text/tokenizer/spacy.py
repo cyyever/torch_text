@@ -11,8 +11,7 @@ import spacy.util
 import torch
 from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import TokenIDsType, TokenIDType, Tokenizer
-
-from .base import collect_tokens
+from cyy_torch_toolbox.tokenizer import collect_tokens
 
 
 def vocab(
@@ -30,29 +29,7 @@ def vocab(
         min_freq: The minimum frequency needed to include a token in the vocabulary.
         specials: Special symbols to add. The order of supplied tokens will be preserved.
 
-    Returns:
-        torchtext.vocab.Vocab: A `Vocab` object
 
-    Examples:
-        >>> from torchtext.vocab import vocab
-        >>> from collections import Counter, OrderedDict
-        >>> counter = Counter(["a", "a", "b", "b", "b"])
-        >>> sorted_by_freq_tuples = sorted(counter.items(), key=lambda x: x[1], reverse=True)
-        >>> ordered_dict = OrderedDict(sorted_by_freq_tuples)
-        >>> v1 = vocab(ordered_dict)
-        >>> print(v1['a']) #prints 1
-        >>> print(v1['out of vocab']) #raise RuntimeError since default index is not set
-        >>> tokens = ['e', 'd', 'c', 'b', 'a']
-        >>> #adding <unk> token and default index
-        >>> unk_token = '<unk>'
-        >>> default_index = -1
-        >>> v2 = vocab(OrderedDict([(token, 1) for token in tokens]), specials=[unk_token])
-        >>> v2.set_default_index(default_index)
-        >>> print(v2['<unk>']) #prints 0
-        >>> print(v2['out of vocab']) #prints -1
-        >>> #make default index same as index of unk_token
-        >>> v2.set_default_index(v2[unk_token])
-        >>> v2['out of vocab'] is v2[unk_token] #prints True
     """
     specials = specials or []
     for token in specials:
@@ -103,13 +80,13 @@ class SpacyTokenizer(Tokenizer):
             ), "len(special_tokens) >= max_tokens, so the vocab will be entirely special tokens."
             max_tokens = max_tokens - len(self.__special_tokens)
         self.__max_tokens = max_tokens
-        self.__itos: list = []
+        self.__itos: list[str] = []
         self.__stoi: dict = {}
         self.__freq_dict: OrderedDict = OrderedDict()
         self.__default_index: int = -1
 
     @property
-    def itos(self) -> list:
+    def itos(self) -> list[str]:
         self.__collect_tokens()
         return self.__itos
 
