@@ -17,11 +17,8 @@ def truncate(input_seq: Sequence, max_seq_len: int) -> Sequence:
     """Truncate input sequence or batch
 
     :param input: Input sequence or batch to be truncated
-    :type input: Union[List[Union[str, int]], List[List[Union[str, int]]]]
     :param max_seq_len: Maximum length beyond which input is discarded
-    :type max_seq_len: int
     :return: Truncated sequence
-    :rtype: Union[List[Union[str, int]], List[List[Union[str, int]]]]
     """
     return input_seq[:max_seq_len]
 
@@ -30,7 +27,6 @@ def apply_tokenizer_transforms(
     dc: DatasetCollection,
     model_evaluator: TextModelEvaluator,
 ) -> None:
-    # Input && InputBatch
     max_len = dc.dataset_kwargs.get("input_max_len", None)
     if max_len is not None:
         log_info("use input text max_len %s", max_len)
