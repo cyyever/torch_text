@@ -1,6 +1,5 @@
 from cyy_huggingface_toolbox import HuggingFaceTokenizer
-
-from .base import Tokenizer
+from cyy_torch_toolbox import Tokenizer
 
 has_spacy: bool = False
 try:
@@ -22,3 +21,6 @@ def get_tokenizer(dc, tokenizer_config: dict) -> Tokenizer | None:
             else:
                 raise RuntimeError("Spacy is broken")
     return None
+
+
+__all__ = ["Tokenizer", "get_tokenizer"]

@@ -16,13 +16,8 @@ from ..tokenizer import get_tokenizer
 from .text_evaluator import TextModelEvaluator
 from .word_vector import PretrainedWordVector
 
-
-def __get_model_evaluator(model, **kwargs: Any) -> TextModelEvaluator:
-    return TextModelEvaluator(model=model, **kwargs)
-
-
-global_model_evaluator_factory.register(DatasetType.Text, [__get_model_evaluator])
-global_model_evaluator_factory.register(DatasetType.CodeText, [__get_model_evaluator])
+global_model_evaluator_factory.register(DatasetType.Text, [TextModelEvaluator])
+global_model_evaluator_factory.register(DatasetType.CodeText, [TextModelEvaluator])
 
 
 model_constructors = get_model_info().get(DatasetType.Text, {})
