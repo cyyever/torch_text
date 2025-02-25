@@ -25,7 +25,7 @@ def vocab(
     Therefore if sorting by token frequency is important to the user, the `ordered_dict` should be created in a way to reflect this.
 
     Args:
-        ordered_dict: Ordered Dictionary mapping tokens to their corresponding occurance frequencies.
+        ordered_dict: Ordered Dictionary mapping tokens to their corresponding occurrence frequencies.
         min_freq: The minimum frequency needed to include a token in the vocabulary.
         specials: Special symbols to add. The order of supplied tokens will be preserved.
 
