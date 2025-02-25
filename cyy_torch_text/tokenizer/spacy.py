@@ -75,9 +75,9 @@ class SpacyTokenizer(Tokenizer):
         for token in ("<pad>", "<unk>", "<mask>", "<cls>", "<sep>"):
             self.__special_tokens.add(token)
         if max_tokens is not None:
-            assert (
-                len(self.__special_tokens) < max_tokens
-            ), "len(special_tokens) >= max_tokens, so the vocab will be entirely special tokens."
+            assert len(self.__special_tokens) < max_tokens, (
+                "len(special_tokens) >= max_tokens, so the vocab will be entirely special tokens."
+            )
             max_tokens = max_tokens - len(self.__special_tokens)
         self.__max_tokens = max_tokens
         self.__itos: list[str] = []
@@ -112,6 +112,10 @@ class SpacyTokenizer(Tokenizer):
 
     def get_mask_token(self) -> str:
         return "<mask>"
+
+    @property
+    def tokenizer(self):
+        return self.spacy_model.tokenizer
 
     def tokenize(self, phrase: str) -> list[str]:
         tokens = self.spacy_model.tokenizer(phrase)
