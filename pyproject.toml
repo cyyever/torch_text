@@ -15,9 +15,11 @@ classifiers = [
   "Programming Language :: Python"
 ]
 
-dynamic = ["dependencies"]
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
+dependencies = [
+  "cyy_huggingface_toolbox@git+https://github.com/cyyever/huggingface_toolbox.git",
+]
+
+
 
 [project.urls]
 Repository = "https://github.com/cyyever/torch_text"
