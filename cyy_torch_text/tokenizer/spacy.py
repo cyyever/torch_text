@@ -10,7 +10,7 @@ import spacy.symbols
 import spacy.util
 import torch
 from cyy_naive_lib.log import log_info
-from cyy_torch_toolbox import TokenIDsType, TokenIDType, Tokenizer
+from cyy_torch_toolbox import TokenIDsType, TokenIDType, TokenizerMixin
 from cyy_torch_toolbox.tokenizer import collect_tokens
 
 
@@ -48,7 +48,7 @@ def vocab(
     return itos, stoi, ordered_dict
 
 
-class SpacyTokenizer(Tokenizer):
+class SpacyTokenizer(TokenizerMixin):
     def __init__(
         self,
         dc,
