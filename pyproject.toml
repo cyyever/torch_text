@@ -18,7 +18,7 @@ classifiers = [
 dependencies = [
   "cyy_huggingface_toolbox@git+https://github.com/cyyever/huggingface_toolbox.git",
   "cython@git+https://github.com/cython/cython.git",
-  "spacy=3.7.2"
+  "spacy",
 ]
 
 
