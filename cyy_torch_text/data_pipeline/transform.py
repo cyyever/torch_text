@@ -3,11 +3,11 @@ from collections.abc import Sequence
 
 import torch
 from cyy_naive_lib.log import log_info
+from cyy_preprocessing_pipeline import BatchTransform, Transform
 from cyy_torch_toolbox import (
     DatasetCollection,
     DatasetType,
 )
-from cyy_torch_toolbox.data_pipeline.transform import BatchTransform, Transform
 
 from ..model.text_evaluator import TextModelEvaluator
 from ..tokenizer.spacy import SpacyTokenizer
