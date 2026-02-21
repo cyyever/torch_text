@@ -15,22 +15,22 @@ class PretrainedWordVector:
     __word_vector_root_dir: str = os.path.join(
         os.path.expanduser("~"), "pytorch_word_vector"
     )
-    __word_vector_cache: dict[str, dict] = {}
+    __word_vector_cache: dict[str, dict[str, torch.Tensor]] = {}
 
     def __init__(self, name: str) -> None:
         self.__name = name
 
     @property
-    def word_vector_dict(self):
+    def word_vector_dict(self) -> dict[str, torch.Tensor]:
         if self.__name not in PretrainedWordVector.__word_vector_cache:
             PretrainedWordVector.__word_vector_cache[self.__name] = self.__download()
         return PretrainedWordVector.__word_vector_cache[self.__name]
 
-    def load_to_model(self, model, tokenizer) -> None:
+    def load_to_model(self, model: nn.Module, tokenizer: SpacyTokenizer) -> None:
         assert isinstance(tokenizer, SpacyTokenizer)
         itos = tokenizer.itos
 
-        def __load_embedding(name, module, module_util) -> None:
+        def __load_embedding(name: str, module: nn.Embedding, module_util: ModelUtil) -> None:
             unknown_tokens = set()
             embeddings = module.weight.tolist()
             for idx, token in enumerate(itos):
@@ -60,9 +60,9 @@ class PretrainedWordVector:
     def get_root_dir(cls) -> str:
         return os.getenv("PYTORCH_WORD_VECTOR_ROOT_DIR", cls.__word_vector_root_dir)
 
-    def __download(self) -> dict:
-        word_vector_dict: dict = {}
-        urls: dict = {
+    def __download(self) -> dict[str, torch.Tensor]:
+        word_vector_dict: dict[str, torch.Tensor] = {}
+        urls: dict[str, tuple[str, str]] = {
             "glove.6B.300d": (
                 "http://downloads.cs.stanford.edu/nlp/data/glove.6B.zip",
                 "sha256:617afb2fe6cbd085c235baf7a465b96f4112bd7f7ccb2b2cbd649fed9cbcf2fb",

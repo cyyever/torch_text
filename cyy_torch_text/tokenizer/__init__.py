@@ -1,5 +1,7 @@
+from typing import Any
+
 from cyy_huggingface_toolbox import HuggingFaceTokenizer
-from cyy_torch_toolbox import Tokenizer
+from cyy_torch_toolbox import DatasetCollection, Tokenizer
 
 has_spacy: bool = False
 try:
@@ -10,7 +12,7 @@ except:
     pass
 
 
-def get_tokenizer(dc, tokenizer_config: dict) -> Tokenizer | None:
+def get_tokenizer(dc: DatasetCollection, tokenizer_config: dict[str, Any]) -> Tokenizer | None:
     tokenizer_type: str = tokenizer_config.get("type", "spacy")
     match tokenizer_type:
         case "hugging_face":

@@ -7,18 +7,19 @@ from typing import Any
 import spacy.cli
 import spacy.language
 import spacy.symbols
+import spacy.tokenizer
 import spacy.util
 import torch
 from cyy_naive_lib.log import log_info
-from cyy_torch_toolbox import TokenIDsType, TokenIDType, TokenizerMixin
+from cyy_torch_toolbox import DatasetCollection, TokenIDsType, TokenIDType, TokenizerMixin
 from cyy_torch_toolbox.tokenizer import collect_tokens
 
 
 def vocab(
-    ordered_dict: OrderedDict,
+    ordered_dict: OrderedDict[str, int],
     min_freq: int = 1,
     specials: list[str] | None = None,
-) -> tuple[list, dict, OrderedDict]:
+) -> tuple[list[str], dict[str, int], OrderedDict[str, int]]:
     r"""Factory method for creating a vocab object which maps tokens to indices.
 
     Note that the ordering in which key value pairs were inserted in the `ordered_dict` will be respected when building the vocab.
@@ -51,7 +52,7 @@ def vocab(
 class SpacyTokenizer(TokenizerMixin):
     def __init__(
         self,
-        dc,
+        dc: DatasetCollection,
         package_name: str = "en_core_web_sm",
         special_tokens: None | Iterable[str] | set[str] = None,
         keep_punct: bool = True,
@@ -81,8 +82,8 @@ class SpacyTokenizer(TokenizerMixin):
             max_tokens = max_tokens - len(self.__special_tokens)
         self.__max_tokens = max_tokens
         self.__itos: list[str] = []
-        self.__stoi: dict = {}
-        self.__freq_dict: OrderedDict = OrderedDict()
+        self.__stoi: dict[str, int] = {}
+        self.__freq_dict: OrderedDict[str, int] = OrderedDict()
         self.__default_index: int = -1
 
     @property
@@ -96,7 +97,7 @@ class SpacyTokenizer(TokenizerMixin):
         return self.__stoi
 
     @property
-    def freq_dict(self) -> OrderedDict:
+    def freq_dict(self) -> OrderedDict[str, int]:
         self.__collect_tokens()
         return self.__freq_dict
 
@@ -114,7 +115,7 @@ class SpacyTokenizer(TokenizerMixin):
         return "<mask>"
 
     @property
-    def tokenizer(self):
+    def tokenizer(self) -> spacy.tokenizer.Tokenizer:
         return self.spacy_model.tokenizer
 
     def tokenize(self, phrase: str) -> list[str]:
@@ -191,7 +192,7 @@ class SpacyTokenizer(TokenizerMixin):
         self.__default_index = self.__stoi["<unk>"]
         log_info("vocab size is %s", len(self.__stoi))
 
-    def split_batch_input(self, inputs: torch.Tensor, batch_size: int) -> dict:
+    def split_batch_input(self, inputs: torch.Tensor, batch_size: int) -> dict[str, Any]:
         batch_dim: int = 0
         if isinstance(inputs, torch.Tensor):
             if (

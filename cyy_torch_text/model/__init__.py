@@ -13,6 +13,7 @@ from cyy_torch_toolbox.model import (
 from cyy_torch_toolbox.model.repository import get_model_info
 
 from ..tokenizer import get_tokenizer
+from ..tokenizer.spacy import SpacyTokenizer
 from .text_evaluator import TextModelEvaluator
 from .word_vector import PretrainedWordVector
 
@@ -38,11 +39,11 @@ class TextModelFactory(Factory):
 
     def __create_text_model(
         self,
-        model_constructor_info: dict,
+        model_constructor_info: dict[str, Any],
         dataset_collection: DatasetCollection,
         **kwargs: Any,
-    ) -> dict:
-        final_model_kwargs: dict = kwargs
+    ) -> dict[str, Any]:
+        final_model_kwargs: dict[str, Any] = kwargs
         tokenizer_kwargs = dataset_collection.dataset_kwargs.get("tokenizer", {})
         tokenizer = get_tokenizer(dataset_collection, tokenizer_kwargs)
         log_debug("tokenizer is %s", tokenizer)
@@ -63,7 +64,9 @@ class TextModelFactory(Factory):
         if tokenizer is not None:
             res |= {"tokenizer": tokenizer}
             word_vector_name = kwargs.get("word_vector_name")
-            if word_vector_name is not None:
+            if word_vector_name is not None and isinstance(
+                tokenizer, SpacyTokenizer
+            ):
                 PretrainedWordVector(word_vector_name).load_to_model(
                     model=model,
                     tokenizer=tokenizer,
