@@ -12,10 +12,12 @@ from cyy_torch_toolbox.model import (
 )
 from cyy_torch_toolbox.model.repository import get_model_info
 
-from ..tokenizer import get_tokenizer
-from ..tokenizer.spacy import SpacyTokenizer
+from ..tokenizer import get_tokenizer, has_spacy
 from .text_evaluator import TextModelEvaluator
-from .word_vector import PretrainedWordVector
+
+if has_spacy:
+    from ..tokenizer.spacy import SpacyTokenizer
+    from .word_vector import PretrainedWordVector
 
 global_model_evaluator_factory.register(DatasetType.Text, [TextModelEvaluator])
 global_model_evaluator_factory.register(DatasetType.CodeText, [TextModelEvaluator])
@@ -64,8 +66,10 @@ class TextModelFactory(Factory):
         if tokenizer is not None:
             res |= {"tokenizer": tokenizer}
             word_vector_name = kwargs.get("word_vector_name")
-            if word_vector_name is not None and isinstance(
-                tokenizer, SpacyTokenizer
+            if (
+                has_spacy
+                and word_vector_name is not None
+                and isinstance(tokenizer, SpacyTokenizer)
             ):
                 PretrainedWordVector(word_vector_name).load_to_model(
                     model=model,

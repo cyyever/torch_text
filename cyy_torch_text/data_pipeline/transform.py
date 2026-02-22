@@ -10,7 +10,10 @@ from cyy_torch_toolbox import (
 )
 
 from ..model.text_evaluator import TextModelEvaluator
-from ..tokenizer.spacy import SpacyTokenizer
+from ..tokenizer import has_spacy
+
+if has_spacy:
+    from ..tokenizer.spacy import SpacyTokenizer
 
 
 def truncate(input_seq: Sequence, max_seq_len: int) -> Sequence:
@@ -30,37 +33,36 @@ def apply_tokenizer_transforms(
     max_len = dc.dataset_kwargs.get("input_max_len", None)
     if max_len is not None:
         log_info("use input text max_len %s", max_len)
-    match model_evaluator.tokenizer:
-        case SpacyTokenizer():
-            dc.append_named_transform(
-                Transform(
-                    fun=model_evaluator.tokenizer, component="input", cacheable=True
-                )
+    if has_spacy and isinstance(model_evaluator.tokenizer, SpacyTokenizer):
+        dc.append_named_transform(
+            Transform(
+                fun=model_evaluator.tokenizer, component="input", cacheable=True
             )
-            if max_len is not None:
-                dc.append_named_transform(
-                    Transform(
-                        fun=functools.partial(truncate, max_seq_len=max_len),
-                        component="input",
-                        cacheable=True,
-                    )
-                )
+        )
+        if max_len is not None:
             dc.append_named_transform(
                 Transform(
-                    fun=torch.LongTensor,
+                    fun=functools.partial(truncate, max_seq_len=max_len),
                     component="input",
                     cacheable=True,
                 )
             )
-            dc.append_named_transform(
-                BatchTransform(
-                    fun=functools.partial(
-                        torch.nn.utils.rnn.pad_sequence,
-                        padding_value=model_evaluator.tokenizer.get_token_id("<pad>"),
-                    ),
-                    component="input",
-                )
+        dc.append_named_transform(
+            Transform(
+                fun=torch.LongTensor,
+                component="input",
+                cacheable=True,
             )
+        )
+        dc.append_named_transform(
+            BatchTransform(
+                fun=functools.partial(
+                    torch.nn.utils.rnn.pad_sequence,
+                    padding_value=model_evaluator.tokenizer.get_token_id("<pad>"),
+                ),
+                component="input",
+            )
+        )
 
 
 def add_text_transforms(

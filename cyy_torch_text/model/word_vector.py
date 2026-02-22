@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import os
 import pickle
+from typing import TYPE_CHECKING
 
 import torch
 from cyy_naive_lib.log import log_debug, log_info
@@ -8,7 +11,8 @@ from cyy_naive_lib.source_code.tarball_source import TarballSource
 from cyy_torch_toolbox import ModelUtil
 from torch import nn
 
-from ..tokenizer.spacy import SpacyTokenizer
+if TYPE_CHECKING:
+    from ..tokenizer.spacy import SpacyTokenizer
 
 
 class PretrainedWordVector:
