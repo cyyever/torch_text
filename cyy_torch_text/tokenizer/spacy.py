@@ -4,22 +4,23 @@ from collections import Counter, OrderedDict
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-import spacy.cli
 import spacy.language
 import spacy.symbols
-import spacy.tokenizer
-import spacy.util
 import torch
+import transformers
 from cyy_naive_lib.log import log_info
 from cyy_torch_toolbox import DatasetCollection, TokenIDsType, TokenIDType, TokenizerMixin
 from cyy_torch_toolbox.tokenizer import collect_tokens
+from huggingface_hub import snapshot_download
+from tokenizers import Tokenizer as HFTokenizerBase
+from tokenizers.models import WordLevel as HFWordLevel
 
 
 def vocab(
     ordered_dict: OrderedDict[str, int],
     min_freq: int = 1,
     specials: list[str] | None = None,
-) -> tuple[list[str], dict[str, int], OrderedDict[str, int]]:
+) -> tuple[dict[str, int], OrderedDict[str, int]]:
     r"""Factory method for creating a vocab object which maps tokens to indices.
 
     Note that the ordering in which key value pairs were inserted in the `ordered_dict` will be respected when building the vocab.
@@ -44,16 +45,15 @@ def vocab(
         if freq >= min_freq:
             tokens.append(token)
 
-    itos = tokens
     stoi = {token: idx for idx, token in enumerate(tokens)}
-    return itos, stoi, ordered_dict
+    return stoi, ordered_dict
 
 
 class SpacyTokenizer(TokenizerMixin):
     def __init__(
         self,
         dc: DatasetCollection,
-        package_name: str = "en_core_web_sm",
+        model_name: str = "spacy/en_core_web_sm",
         special_tokens: None | Iterable[str] | set[str] = None,
         keep_punct: bool = True,
         keep_stop: bool = True,
@@ -64,10 +64,10 @@ class SpacyTokenizer(TokenizerMixin):
         self.__keep_punct = keep_punct
         self.__keep_stop = keep_stop
         self.__min_freq = min_freq
-        self.__package_name = package_name
-        if not spacy.util.is_package(package_name):
-            spacy.cli.download(package_name)
-        self.__spacy: spacy.language.Language = spacy.load(package_name)
+        self.__model_name = model_name
+        repo_id = model_name if "/" in model_name else f"spacy/{model_name}"
+        model_path = snapshot_download(repo_id=repo_id)
+        self.__spacy: spacy.language.Language = spacy.load(model_path)
 
         if special_tokens is None:
             self.__special_tokens = set()
@@ -81,20 +81,22 @@ class SpacyTokenizer(TokenizerMixin):
             )
             max_tokens = max_tokens - len(self.__special_tokens)
         self.__max_tokens = max_tokens
-        self.__itos: list[str] = []
-        self.__stoi: dict[str, int] = {}
         self.__freq_dict: OrderedDict[str, int] = OrderedDict()
-        self.__default_index: int = -1
+        self.__hf_tokenizer: transformers.PreTrainedTokenizerFast | None = None
+        self.__itos: list[str] | None = None
 
     @property
     def itos(self) -> list[str]:
-        self.__collect_tokens()
+        if self.__itos is None:
+            self.__collect_tokens()
+            v = self.tokenizer.get_vocab()
+            self.__itos = [token for token, _ in sorted(v.items(), key=lambda x: x[1])]
         return self.__itos
 
     @property
     def stoi(self) -> dict[str, int]:
         self.__collect_tokens()
-        return self.__stoi
+        return self.tokenizer.get_vocab()
 
     @property
     def freq_dict(self) -> OrderedDict[str, int]:
@@ -115,8 +117,10 @@ class SpacyTokenizer(TokenizerMixin):
         return "<mask>"
 
     @property
-    def tokenizer(self) -> spacy.tokenizer.Tokenizer:
-        return self.spacy_model.tokenizer
+    def tokenizer(self) -> transformers.PreTrainedTokenizerFast:
+        self.__collect_tokens()
+        assert self.__hf_tokenizer is not None
+        return self.__hf_tokenizer
 
     def tokenize(self, phrase: str) -> list[str]:
         tokens = self.spacy_model.tokenizer(phrase)
@@ -128,7 +132,7 @@ class SpacyTokenizer(TokenizerMixin):
         ]
 
     def get_token_id(self, token: str) -> int:
-        return self.stoi.get(token, self.__default_index)
+        return self.tokenizer.convert_tokens_to_ids(token)
 
     def get_token_ids_from_transformed_result(
         self, transformed_result: Any
@@ -153,13 +157,13 @@ class SpacyTokenizer(TokenizerMixin):
         ]
 
     def get_token(self, token_id: TokenIDType) -> str:
-        return self.itos[token_id]
+        return self.tokenizer.convert_ids_to_tokens(token_id)
 
     def strip_special_tokens(self, token_ids: TokenIDsType) -> TokenIDsType:
         return token_ids[token_ids != self.get_token_id("<pad>")]
 
     def __collect_tokens(self) -> None:
-        if self.__itos:
+        if self.__hf_tokenizer is not None:
             return
 
         for token in self.__special_tokens:
@@ -169,7 +173,7 @@ class SpacyTokenizer(TokenizerMixin):
             )
         # First sort by descending frequency, then lexicographically
         filename = base64.b64encode(
-            f"spacy_tokens_{self.__package_name}_{self.__keep_punct}_{self.__keep_stop}_{self.__max_tokens}_{'_'.join(sorted(self.__special_tokens))}".encode()
+            f"spacy_tokens_{self.__model_name}_{self.__keep_punct}_{self.__keep_stop}_{self.__max_tokens}_{'_'.join(sorted(self.__special_tokens))}".encode()
         ).decode()
         counter: Counter = self.__dc.get_cached_data(
             file=f"{filename}.pk",
@@ -183,14 +187,22 @@ class SpacyTokenizer(TokenizerMixin):
             ordered_dict = OrderedDict(sorted_by_freq_tuples)
         else:
             ordered_dict = OrderedDict(sorted_by_freq_tuples[: self.__max_tokens])
-        self.__itos, self.__stoi, self.__freq_dict = vocab(
+        stoi, self.__freq_dict = vocab(
             ordered_dict,
             min_freq=self.__min_freq,
             specials=list(self.__special_tokens),
         )
 
-        self.__default_index = self.__stoi["<unk>"]
-        log_info("vocab size is %s", len(self.__stoi))
+        hf_base = HFTokenizerBase(HFWordLevel(vocab=stoi, unk_token="<unk>"))
+        self.__hf_tokenizer = transformers.PreTrainedTokenizerFast(
+            tokenizer_object=hf_base,
+            unk_token="<unk>",
+            pad_token="<pad>",
+            mask_token="<mask>",
+            cls_token="<cls>",
+            sep_token="<sep>",
+        )
+        log_info("vocab size is %s", len(stoi))
 
     def split_batch_input(self, inputs: torch.Tensor, batch_size: int) -> dict[str, Any]:
         batch_dim: int = 0

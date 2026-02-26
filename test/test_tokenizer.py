@@ -30,3 +30,7 @@ if has_spacy:
         tokenizer = trainer.model_evaluator.tokenizer
         assert isinstance(tokenizer, SpacyTokenizer)
         tokenizer_testcases(tokenizer=tokenizer)
+        # Verify HuggingFace tokenizer is created from vocab
+        import transformers
+
+        assert isinstance(tokenizer.tokenizer, transformers.PreTrainedTokenizerFast)

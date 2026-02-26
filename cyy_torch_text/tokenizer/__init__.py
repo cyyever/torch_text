@@ -19,7 +19,10 @@ def get_tokenizer(dc: DatasetCollection, tokenizer_config: dict[str, Any]) -> To
             return HuggingFaceTokenizer(tokenizer_config)
         case "spacy":
             if has_spacy:
-                return SpacyTokenizer(dc, **tokenizer_config.get("kwargs", {}))
+                kwargs = tokenizer_config.get("kwargs", {}).copy()
+                if "name" in tokenizer_config and "model_name" not in kwargs:
+                    kwargs["model_name"] = tokenizer_config["name"]
+                return SpacyTokenizer(dc, **kwargs)
             else:
                 raise RuntimeError("Spacy is broken")
     return None
