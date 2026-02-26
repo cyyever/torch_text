@@ -31,6 +31,8 @@ class PretrainedWordVector:
         return PretrainedWordVector.__word_vector_cache[self.__name]
 
     def load_to_model(self, model: nn.Module, tokenizer: SpacyTokenizer) -> None:
+        from ..tokenizer.spacy import SpacyTokenizer
+
         assert isinstance(tokenizer, SpacyTokenizer)
         itos = tokenizer.itos
 
