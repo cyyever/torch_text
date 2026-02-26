@@ -8,8 +8,9 @@ import spacy.language
 import spacy.symbols
 import torch
 import transformers
+from cyy_huggingface_toolbox import HuggingFaceTokenizerBase
 from cyy_naive_lib.log import log_info
-from cyy_torch_toolbox import DatasetCollection, TokenIDsType, TokenIDType, TokenizerMixin
+from cyy_torch_toolbox import DatasetCollection, TokenIDsType
 from cyy_torch_toolbox.tokenizer import collect_tokens
 from huggingface_hub import snapshot_download
 from tokenizers import Tokenizer as HFTokenizerBase
@@ -49,7 +50,7 @@ def vocab(
     return stoi, ordered_dict
 
 
-class SpacyTokenizer(TokenizerMixin):
+class SpacyTokenizer(HuggingFaceTokenizerBase):
     def __init__(
         self,
         dc: DatasetCollection,
@@ -131,9 +132,6 @@ class SpacyTokenizer(TokenizerMixin):
             and (self.__keep_stop or not t.is_stop)
         ]
 
-    def get_token_id(self, token: str) -> int:
-        return self.tokenizer.convert_tokens_to_ids(token)
-
     def get_token_ids_from_transformed_result(
         self, transformed_result: Any
     ) -> TokenIDsType:
@@ -155,9 +153,6 @@ class SpacyTokenizer(TokenizerMixin):
             self.get_token(token_id=token_id)
             for token_id in transformed_result.tolist()
         ]
-
-    def get_token(self, token_id: TokenIDType) -> str:
-        return self.tokenizer.convert_ids_to_tokens(token_id)
 
     def strip_special_tokens(self, token_ids: TokenIDsType) -> TokenIDsType:
         return token_ids[token_ids != self.get_token_id("<pad>")]
