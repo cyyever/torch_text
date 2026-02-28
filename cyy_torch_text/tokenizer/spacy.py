@@ -185,7 +185,7 @@ class SpacyTokenizer(HuggingFaceTokenizerBase):
         stoi, self.__freq_dict = vocab(
             ordered_dict,
             min_freq=self.__min_freq,
-            specials=list(self.__special_tokens),
+            specials=sorted(self.__special_tokens),
         )
 
         hf_base = HFTokenizerBase(HFWordLevel(vocab=stoi, unk_token="<unk>"))
